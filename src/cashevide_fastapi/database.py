@@ -4,7 +4,7 @@ from sqlalchemy.orm import DeclarativeBase
 
 from cashevide_fastapi.config import settings
 
-engine = create_async_engine(settings.database_url, echo=True)
+engine = create_async_engine(settings.database_url, echo=settings.db_echo)
 
 
 AsyncSessionLocal = async_sessionmaker(bind=engine, expire_on_commit=False)
