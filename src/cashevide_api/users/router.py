@@ -24,9 +24,16 @@ async def get_user(user_id: int, db: AsyncSession = Depends(get_db)) -> User:
 
 @router.post("/signup", response_model=UserOut, status_code=201)
 async def signup(payload: UserCreate, db: AsyncSession = Depends(get_db)) -> User:
-    existing = await db.scalar(select(User).where(User.email == payload.email))
+    existing_email = await db.scalar(select(User).where(User.email == payload.email))
 
-    if existing is not None:
+    if existing_email is not None:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    existing_username = await db.scalar(
+        select(User).where(User.username == payload.username)
+    )
+
+    if existing_username is not None:
         raise HTTPException(status_code=400, detail="Email already registered")
 
     user = User(
