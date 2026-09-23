@@ -1,0 +1,11 @@
+
+### Signup
+
+POST {{base_url}}/users/signup
+Content-Type: application/json
+
+{
+  "email": "test10@email.com",
+  "password": "noufal123",
+  "username": "test"
+}

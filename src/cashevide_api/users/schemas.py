@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 
 class UserOut(BaseModel):
@@ -8,3 +8,9 @@ class UserOut(BaseModel):
     email: str
     username: str
     is_active: bool
+
+
+class UserCreate(BaseModel):
+    email: EmailStr
+    username: str
+    password: str
