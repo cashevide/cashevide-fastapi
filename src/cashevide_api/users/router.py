@@ -34,7 +34,7 @@ async def signup(payload: UserCreate, db: AsyncSession = Depends(get_db)) -> Use
     )
 
     if existing_username is not None:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        raise HTTPException(status_code=400, detail="Username already registered")
 
     user = User(
         email=payload.email,
