@@ -2,9 +2,9 @@ from fastapi import APIRouter, HTTPException, Depends
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from cashevide_fastapi.database import get_db
-from cashevide_fastapi.users.models import User
-from cashevide_fastapi.users.schemas import UserOut
+from cashevide_api.database import get_db
+from cashevide_api.users.models import User
+from cashevide_api.users.schemas import UserOut
 
 router = APIRouter(prefix="/users", tags=["users"])
 

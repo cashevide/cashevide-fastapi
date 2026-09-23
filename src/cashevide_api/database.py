@@ -2,7 +2,7 @@ from collections.abc import AsyncGenerator
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.orm import DeclarativeBase
 
-from cashevide_fastapi.config import settings
+from cashevide_api.config import settings
 
 engine = create_async_engine(settings.database_url, echo=settings.db_echo)
 

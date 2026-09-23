@@ -2,7 +2,7 @@ from sqlalchemy import Boolean, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 
-from cashevide_fastapi.database import Base
+from cashevide_api.database import Base
 
 
 class User(Base):
