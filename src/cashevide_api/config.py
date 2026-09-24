@@ -13,6 +13,10 @@ class Settings(BaseSettings):
     db_port: int = 5432
     db_echo: bool = False
 
+    jwt_secret_key: str
+    jwt_algorithm: str = "HS256"
+    jwt_access_token_expire_minutes: int = 60
+
     @property
     def database_url(self) -> str:
         return (
