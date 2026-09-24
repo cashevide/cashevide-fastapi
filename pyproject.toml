@@ -10,6 +10,7 @@ dependencies = [
   "fastapi[standard]>=0.141.1",
   "passlib>=1.7.4",
   "pydantic-settings>=2.15.0",
+  "pyjwt>=2.15.0",
   "sqlalchemy>=2.0.54",
 ]
 

@@ -6,8 +6,8 @@ from sqlalchemy import select
 
 from cashevide_api.database import get_db
 from cashevide_api.users.models import User
-from cashevide_api.users.schemas import UserOut, UserCreate
-from cashevide_api.security import hash_password
+from cashevide_api.users.schemas import UserOut, UserCreate, UserLogin
+from cashevide_api.security import hash_password, verify_password
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -17,7 +17,7 @@ async def get_user(user_id: int, db: AsyncSession = Depends(get_db)) -> User:
     user = await db.get(User, user_id)
 
     if user is None:
-        raise HTTPException(status_code=404, detail="user not found")
+        raise HTTPException(status_code=404, detail="User not found")
 
     return user
 
@@ -45,5 +45,22 @@ async def signup(payload: UserCreate, db: AsyncSession = Depends(get_db)) -> Use
     db.add(user)
     await db.commit()
     await db.refresh(user)
+
+    return user
+
+
+@router.post("/login", response_model=UserOut, status_code=200)
+async def login(payload: UserLogin, db: AsyncSession = Depends(get_db)):
+    user = await db.scalar(
+        select(User).where(
+            User.email == payload.email,
+        )
+    )
+
+    if user is None:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    if not verify_password(payload.password, user.password):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
 
     return user
