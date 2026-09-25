@@ -19,3 +19,9 @@ class UserCreate(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+
+class LoginResponse(BaseModel):
+    user: UserOut
+    access_token: str
+    token_type: str = "bearer"

@@ -1,4 +1,9 @@
+from datetime import datetime, timedelta, timezone
+
+import jwt
 from passlib.context import CryptContext
+
+from cashevide_api.config import settings
 
 
 pwd_context = CryptContext(
@@ -13,3 +18,15 @@ def hash_password(plain_password: str) -> str:
 
 def verify_password(plain_password: str, hash_password: str) -> bool:
     return pwd_context.verify(plain_password, hash_password)
+
+
+def create_access_token(user_id: str) -> str:
+    expire = datetime.now(timezone.utc) + timedelta(
+        minutes=settings.jwt_access_token_expire_minutes
+    )
+
+    payload = {"sub": str(user_id), "exp": expire}
+
+    return jwt.encode(
+        payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm
+    )
