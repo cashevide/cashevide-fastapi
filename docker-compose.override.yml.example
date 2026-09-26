@@ -1,5 +1,8 @@
 services:
   web:
+    command: /app/.venv/bin/uvicorn cashevide_api.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - .:/app
     ports:
       - "8001:8000"
     networks:
@@ -14,6 +17,6 @@ services:
 networks:
   proxy-network:
     external: false
-  cashevide-api_default:
+  cashevide_default:
     external: false
   default:
