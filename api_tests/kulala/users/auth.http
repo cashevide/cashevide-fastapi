@@ -22,5 +22,6 @@ Content-Type: application/json
 }
 
 > {%
-  client.global.set("token", response.body.access_token)
+    client.global.set("token", response.body.access)
+    client.global.set("refresh", response.body.refresh)
 %}

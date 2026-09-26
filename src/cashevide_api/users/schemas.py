@@ -7,7 +7,7 @@ class UserOut(BaseModel):
     id: int
     email: str
     username: str
-    is_active: bool
+    # is_active: bool
 
 
 class UserCreate(BaseModel):
@@ -22,6 +22,7 @@ class UserLogin(BaseModel):
 
 
 class LoginResponse(BaseModel):
+    message: str
     user: UserOut
-    access_token: str
-    token_type: str = "bearer"
+    access: str
+    refresh: str

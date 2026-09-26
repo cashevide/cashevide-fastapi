@@ -7,7 +7,12 @@ from sqlalchemy import select
 from cashevide_api.database import get_db
 from cashevide_api.users.models import User
 from cashevide_api.users.schemas import UserOut, UserCreate, UserLogin, LoginResponse
-from cashevide_api.security import hash_password, verify_password, create_access_token
+from cashevide_api.security import (
+    hash_password,
+    verify_password,
+    create_access_token,
+    create_refresh_token,
+)
 from cashevide_api.dependencies import get_current_user
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -62,6 +67,8 @@ async def login(
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
     return LoginResponse(
+        message="login successful",
         user=UserOut.model_validate(user),
-        access_token=create_access_token(str(user.id)),
+        access=create_access_token(str(user.id)),
+        refresh=create_refresh_token(user.id),
     )
