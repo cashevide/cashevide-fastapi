@@ -20,3 +20,7 @@ Content-Type: application/json
   "email": "test@email.com",
   "password": "noufalka123"
 }
+
+> {%
+  client.global.set("token", response.body.access_token)
+%}

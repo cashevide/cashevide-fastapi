@@ -25,7 +25,6 @@ async def get_user(user_id: int, db: AsyncSession = Depends(get_db)) -> User:
 
 @router.get("/profile/me", response_model=UserOut)
 async def get_me(current_user: User = Depends(get_current_user)) -> User:
-
     return current_user
 
 
