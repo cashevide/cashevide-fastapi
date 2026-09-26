@@ -33,8 +33,8 @@ def create_access_token(user_id: str) -> str:
 
 
 def decode_access_token(token: str) -> int:
-    paylod = jwt.decode(
+    payload = jwt.decode(
         token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm]
     )
 
-    return int(paylod["sub"])
+    return int(payload["sub"])
