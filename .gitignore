@@ -218,4 +218,6 @@ __marimo__/
 .streamlit/secrets.toml
 
 
+docker-compose.override.yml
+
 temp.py

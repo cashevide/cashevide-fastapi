@@ -1,0 +1,19 @@
+services:
+  web:
+    ports:
+      - "8001:8000"
+    networks:
+      - default
+    environment:
+      - DB_HOST=host.docker.internal
+    env_file:
+      - .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+networks:
+  proxy-network:
+    external: false
+  cashevide-api_default:
+    external: false
+  default:
