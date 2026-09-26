@@ -1,0 +1,16 @@
+services:
+  web:
+    build: .
+    container_name: cashevide-fastapi-web
+    env_file:
+      - .env
+    networks:
+      - proxy-network
+      - cashevide-api_default
+    restart: unless-stopped
+
+networks:
+  proxy-network:
+    external: true
+  cashevide-api_default:
+    external: true
