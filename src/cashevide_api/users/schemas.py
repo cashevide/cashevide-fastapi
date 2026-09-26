@@ -7,7 +7,6 @@ class UserOut(BaseModel):
     id: int
     email: str
     username: str
-    # is_active: bool
 
 
 class UserCreate(BaseModel):
