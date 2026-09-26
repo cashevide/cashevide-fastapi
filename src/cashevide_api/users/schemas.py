@@ -1,4 +1,5 @@
 from pydantic import BaseModel, ConfigDict, EmailStr
+from typing import Literal
 
 
 class UserOut(BaseModel):
@@ -18,6 +19,7 @@ class UserCreate(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+    platform: Literal["web", "mobile"] = "mobile"
 
 
 class LoginResponse(BaseModel):
@@ -25,3 +27,4 @@ class LoginResponse(BaseModel):
     user: UserOut
     access: str
     refresh: str
+    platform: Literal["web", "mobile"] = "mobile"
