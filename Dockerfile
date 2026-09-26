@@ -28,4 +28,4 @@ ENTRYPOINT ["/entrypoint.sh"]
 
 EXPOSE 8000
 
-CMD ["uv", "run", "--no-sync", "uvicorn", "cashevide_api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["/app/.venv/bin/uvicorn", "cashevide_api.main:app", "--host", "0.0.0.0", "--port", "8000"]
