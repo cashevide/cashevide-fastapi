@@ -8,6 +8,7 @@ from cashevide_api.database import get_db
 from cashevide_api.users.models import User
 from cashevide_api.users.schemas import UserOut, UserCreate, UserLogin, LoginResponse
 from cashevide_api.security import hash_password, verify_password, create_access_token
+from cashevide_api.dependencies import get_current_user
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -69,3 +70,8 @@ async def login(
         user=UserOut.model_validate(user),
         access_token=create_access_token(str(user.id)),
     )
+
+
+@router.post("/profile/me", response_model=UserOut, status_code=200)
+async def current_user(db: AsyncSession = Depends(get_db)) -> User:
+    pass
