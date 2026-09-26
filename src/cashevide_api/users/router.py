@@ -13,16 +13,6 @@ from cashevide_api.dependencies import get_current_user
 router = APIRouter(prefix="/users", tags=["users"])
 
 
-@router.get("/{user_id}", response_model=UserOut)
-async def get_user(user_id: int, db: AsyncSession = Depends(get_db)) -> User:
-    user = await db.get(User, user_id)
-
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    return user
-
-
 @router.get("/profile/me", response_model=UserOut)
 async def get_me(current_user: User = Depends(get_current_user)) -> User:
     return current_user
