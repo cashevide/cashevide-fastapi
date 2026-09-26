@@ -2,3 +2,10 @@
 
 GET {{base_url}}/users/19 HTTP/1.1
 Content-Type: application/json
+
+
+
+### GET Profile
+
+GET {{base_url}}/profile/me HTTP/1.1
+Content-Type: application/json

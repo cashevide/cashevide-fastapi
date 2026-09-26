@@ -23,6 +23,12 @@ async def get_user(user_id: int, db: AsyncSession = Depends(get_db)) -> User:
     return user
 
 
+@router.get("/profile/me", response_model=UserOut)
+async def get_me(current_user: User = Depends(get_current_user)) -> User:
+
+    return current_user
+
+
 @router.post("/signup", response_model=UserOut, status_code=201)
 async def signup(payload: UserCreate, db: AsyncSession = Depends(get_db)) -> User:
     existing_email = await db.scalar(select(User).where(User.email == payload.email))
@@ -70,8 +76,3 @@ async def login(
         user=UserOut.model_validate(user),
         access_token=create_access_token(str(user.id)),
     )
-
-
-@router.post("/profile/me", response_model=UserOut, status_code=200)
-async def current_user(db: AsyncSession = Depends(get_db)) -> User:
-    pass
