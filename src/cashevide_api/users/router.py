@@ -62,7 +62,7 @@ async def signup(payload: UserCreate, db: AsyncSession = Depends(get_db)) -> Use
 )
 async def login(
     payload: UserLogin, response: Response, db: AsyncSession = Depends(get_db)
-) -> LoginResponse:
+) -> LoginResponse | MobileLoginResponse:
     user = await db.scalar(
         select(User).where(
             User.email == payload.email,
