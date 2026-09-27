@@ -25,6 +25,8 @@ class UserLogin(BaseModel):
 class LoginResponse(BaseModel):
     message: str
     user: UserOut
-    access: str
-    refresh: str
-    platform: Literal["web", "mobile"] = "mobile"
+
+
+class MobileLoginResponse(LoginResponse):
+    access: str | None
+    refresh: str | None

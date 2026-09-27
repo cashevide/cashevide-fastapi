@@ -1,12 +1,19 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Response
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from sqlalchemy import select
 
+from cashevide_api.config import settings
 from cashevide_api.database import get_db
 from cashevide_api.users.models import User
-from cashevide_api.users.schemas import UserOut, UserCreate, UserLogin, LoginResponse
+from cashevide_api.users.schemas import (
+    UserOut,
+    UserCreate,
+    UserLogin,
+    LoginResponse,
+    MobileLoginResponse,
+)
 from cashevide_api.security import (
     hash_password,
     verify_password,
@@ -50,9 +57,11 @@ async def signup(payload: UserCreate, db: AsyncSession = Depends(get_db)) -> Use
     return user
 
 
-@router.post("/login", response_model=LoginResponse, status_code=200)
+@router.post(
+    "/login", response_model=LoginResponse | MobileLoginResponse, status_code=200
+)
 async def login(
-    payload: UserLogin, db: AsyncSession = Depends(get_db)
+    payload: UserLogin, response: Response, db: AsyncSession = Depends(get_db)
 ) -> LoginResponse:
     user = await db.scalar(
         select(User).where(
@@ -60,15 +69,44 @@ async def login(
         )
     )
 
-    if user is None:
+    if user is None or not verify_password(payload.password, user.password):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    if not verify_password(payload.password, user.password):
-        raise HTTPException(status_code=401, detail="Invalid email or password")
+    access_token = create_access_token(str(user.id))
+    refresh_token = create_refresh_token(user.id)
 
-    return LoginResponse(
-        message="login successful",
-        user=UserOut.model_validate(user),
-        access=create_access_token(str(user.id)),
-        refresh=create_refresh_token(user.id),
-    )
+    if payload.platform == "web":
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            max_age=settings.jwt_access_token_expire_minutes * 60,
+            httponly=True,
+            secure=not settings.debug,
+            samesite="lax",
+            domain=settings.cookie_domain,
+        )
+
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            max_age=settings.jwt_refresh_token_expire_days * 24 * 60 * 60,
+            httponly=True,
+            secure=not settings.debug,
+            samesite="lax",
+            domain=settings.cookie_domain,
+        )
+
+        body = LoginResponse(
+            message="login successful",
+            user=UserOut.model_validate(user),
+        )
+
+    else:
+        body = MobileLoginResponse(
+            message="login successful",
+            user=UserOut.model_validate(user),
+            access=access_token,
+            refresh=refresh_token,
+        )
+
+    return body

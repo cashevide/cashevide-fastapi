@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     jwt_access_token_expire_minutes: int = 5
     jwt_refresh_token_expire_days: int = 90
 
+    cookie_domain: str | None = None
+
     @property
     def database_url(self) -> str:
         return (

@@ -18,10 +18,22 @@ Content-Type: application/json
 
 {
   "email": "test@email.com",
-  "password": "noufalka123"
+  "password": "noufalka123",
+  "platform": "mobile"
 }
 
 > {%
-    client.global.set("token", response.body.access)
-    client.global.set("refresh", response.body.refresh)
+  var cookieHeader = response.headers.valueOf("Set-Cookie");
+
+  if (cookieHeader) {
+      var match = cookieHeader.match(/access_token=([^;]+)/);
+
+      if (match) {
+          client.global.set("token", match[1]);
+      }
+  }
+  else{
+      client.global.set("token", response.body.access)
+      client.global.set("refresh", response.body.refresh)
+    }
 %}
