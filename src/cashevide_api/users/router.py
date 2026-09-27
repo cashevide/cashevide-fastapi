@@ -13,12 +13,15 @@ from cashevide_api.users.schemas import (
     UserLogin,
     LoginResponse,
     MobileLoginResponse,
+    TokenRefreshResponse,
+    TokenRefresh,
 )
 from cashevide_api.security import (
     hash_password,
     verify_password,
     create_access_token,
     create_refresh_token,
+    decode_refresh_token,
 )
 from cashevide_api.dependencies import get_current_user
 
@@ -73,7 +76,7 @@ async def login(
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
     access_token = create_access_token(str(user.id))
-    refresh_token = create_refresh_token(user.id)
+    refresh_token = create_refresh_token(str(user.id))
 
     if payload.platform == "web":
         response.set_cookie(
@@ -110,3 +113,16 @@ async def login(
         )
 
     return body
+
+
+@router.post("/token/refresh", response_model=TokenRefreshResponse)
+async def token_refresh(
+    payload: TokenRefresh, db: AsyncSession = Depends(get_db)
+) -> TokenRefreshResponse:
+    user_id = decode_refresh_token(token=str(payload.refresh))
+
+    return TokenRefreshResponse(
+        message="Token refreshed successfully",
+        access=create_access_token(str(user_id)),
+        refresh=create_refresh_token(str(user_id)),
+    )

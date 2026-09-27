@@ -1,0 +1,25 @@
+### Refresh access token
+
+POST {{base_url}}/users/token/refresh HTTP/1.1
+Content-Type: application/json
+
+{
+  "platform": "mobile",
+  "refresh": "{{refresh}}"
+}
+
+> {%
+  var cookieHeader = response.headers.valueOf("Set-Cookie");
+
+  if (cookieHeader) {
+      var match = cookieHeader.match(/access_token=([^;]+)/);
+
+      if (match) {
+          client.global.set("token", match[1]);
+      }
+  }
+  else{
+      client.global.set("token", response.body.access)
+      client.global.set("refresh", response.body.refresh)
+    }
+%}

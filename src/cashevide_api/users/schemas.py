@@ -30,3 +30,14 @@ class LoginResponse(BaseModel):
 class MobileLoginResponse(LoginResponse):
     access: str | None
     refresh: str | None
+
+
+class TokenRefresh(BaseModel):
+    platform: Literal["web", "mobile"] = "mobile"
+    refresh: str | None
+
+
+class TokenRefreshResponse(BaseModel):
+    message: str
+    access: str | None
+    refresh: str | None

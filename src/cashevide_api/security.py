@@ -32,7 +32,7 @@ def create_access_token(user_id: str) -> str:
     )
 
 
-def create_refresh_token(user_id: int) -> str:
+def create_refresh_token(user_id: str) -> str:
     expire = datetime.now(timezone.utc) + timedelta(
         days=settings.jwt_refresh_token_expire_days
     )
@@ -48,5 +48,16 @@ def decode_access_token(token: str) -> int:
     payload = jwt.decode(
         token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm]
     )
+
+    return int(payload["sub"])
+
+
+def decode_refresh_token(token: str) -> int:
+    payload = jwt.decode(
+        token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm]
+    )
+
+    if payload.get("type") != "refresh":
+        raise jwt.InvalidTokenError("Not a refresh token")
 
     return int(payload["sub"])
