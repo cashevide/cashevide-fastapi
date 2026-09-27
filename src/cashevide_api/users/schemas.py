@@ -25,11 +25,8 @@ class UserLogin(BaseModel):
 class LoginResponse(BaseModel):
     message: str
     user: UserOut
-
-
-class MobileLoginResponse(LoginResponse):
-    access: str | None
-    refresh: str | None
+    access: str | None = None
+    refresh: str | None = None
 
 
 class TokenRefresh(BaseModel):
@@ -39,5 +36,5 @@ class TokenRefresh(BaseModel):
 
 class TokenRefreshResponse(BaseModel):
     message: str
-    access: str | None
-    refresh: str | None
+    access: str | None = None
+    refresh: str | None = None

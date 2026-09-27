@@ -12,7 +12,6 @@ from cashevide_api.users.schemas import (
     UserCreate,
     UserLogin,
     LoginResponse,
-    MobileLoginResponse,
     TokenRefreshResponse,
     TokenRefresh,
 )
@@ -61,11 +60,14 @@ async def signup(payload: UserCreate, db: AsyncSession = Depends(get_db)) -> Use
 
 
 @router.post(
-    "/login", response_model=LoginResponse | MobileLoginResponse, status_code=200
+    "/login",
+    response_model=LoginResponse,
+    response_model_exclude_none=True,
+    status_code=200,
 )
 async def login(
     payload: UserLogin, response: Response, db: AsyncSession = Depends(get_db)
-) -> LoginResponse | MobileLoginResponse:
+) -> LoginResponse:
     user = await db.scalar(
         select(User).where(
             User.email == payload.email,
@@ -105,7 +107,7 @@ async def login(
         )
 
     else:
-        body = MobileLoginResponse(
+        body = LoginResponse(
             message="login successful",
             user=UserOut.model_validate(user),
             access=access_token,
@@ -115,14 +117,54 @@ async def login(
     return body
 
 
-@router.post("/token/refresh", response_model=TokenRefreshResponse)
+@router.post(
+    "/token/refresh",
+    response_model=TokenRefreshResponse,
+    response_model_exclude_none=True,
+)
 async def token_refresh(
-    payload: TokenRefresh, db: AsyncSession = Depends(get_db)
+    payload: TokenRefresh, response: Response, db: AsyncSession = Depends(get_db)
 ) -> TokenRefreshResponse:
+
+    platform = payload.platform
+    refresh_token = payload.refresh
+
     user_id = decode_refresh_token(token=str(payload.refresh))
 
-    return TokenRefreshResponse(
-        message="Token refreshed successfully",
-        access=create_access_token(str(user_id)),
-        refresh=create_refresh_token(str(user_id)),
-    )
+    access_token = create_access_token(user_id=str(user_id))
+    refresh_token = create_refresh_token(user_id=str(user_id))
+
+    if platform == "mobile":
+        if not refresh_token:
+            raise HTTPException(status_code=400, detail="Refresh token is required")
+
+        return TokenRefreshResponse(
+            message="Token refreshed successfully",
+            access=access_token,
+            refresh=refresh_token,
+        )
+
+    else:
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            max_age=settings.jwt_access_token_expire_minutes * 60,
+            httponly=True,
+            secure=not settings.debug,
+            samesite="lax",
+            domain=settings.cookie_domain,
+        )
+
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            max_age=settings.jwt_refresh_token_expire_days * 24 * 60 * 60,
+            httponly=True,
+            secure=not settings.debug,
+            samesite="lax",
+            domain=settings.cookie_domain,
+        )
+
+        return TokenRefreshResponse(
+            message="Token refreshed successfully",
+        )
