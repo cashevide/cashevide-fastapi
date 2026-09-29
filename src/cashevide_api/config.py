@@ -22,6 +22,15 @@ class Settings(BaseSettings):
 
     cookie_domain: str | None = None
 
+    cors_allowed_origins: str = ""
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        if not self.cors_allowed_origins:
+            return []
+
+        return [origin.strip() for origin in self.cors_allowed_origins.split(",")]
+
     @property
     def database_url(self) -> str:
         return (
