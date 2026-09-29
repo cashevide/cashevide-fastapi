@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, Response
+from fastapi import APIRouter, HTTPException, Depends, Response, Cookie
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -101,20 +101,18 @@ async def login(
             domain=settings.cookie_domain,
         )
 
-        body = LoginResponse(
+        return LoginResponse(
             message="login successful",
             user=UserOut.model_validate(user),
         )
 
     else:
-        body = LoginResponse(
+        return LoginResponse(
             message="login successful",
             user=UserOut.model_validate(user),
             access=access_token,
             refresh=refresh_token,
         )
-
-    return body
 
 
 @router.post(
@@ -122,29 +120,32 @@ async def login(
     response_model=TokenRefreshResponse,
     response_model_exclude_none=True,
 )
-async def token_refresh(
-    payload: TokenRefresh, response: Response, db: AsyncSession = Depends(get_db)
+async def refresh_access_token(
+    payload: TokenRefresh,
+    response: Response,
+    refresh_token_cookie: str | None = Cookie(default=None, alias="refresh_token"),
 ) -> TokenRefreshResponse:
 
     platform = payload.platform
     refresh_token = payload.refresh
 
-    user_id = decode_refresh_token(token=str(payload.refresh))
+    if not refresh_token:
+        refresh_token = refresh_token_cookie
+        if refresh_token:
+            platform = "web"
+
+    if not refresh_token:
+        raise HTTPException(status_code=400, detail="Refresh token is required")
+
+    try:
+        user_id = decode_refresh_token(token=str(refresh_token))
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
 
     access_token = create_access_token(user_id=str(user_id))
     refresh_token = create_refresh_token(user_id=str(user_id))
 
-    if platform == "mobile":
-        if not refresh_token:
-            raise HTTPException(status_code=400, detail="Refresh token is required")
-
-        return TokenRefreshResponse(
-            message="Token refreshed successfully",
-            access=access_token,
-            refresh=refresh_token,
-        )
-
-    else:
+    if platform == "web":
         response.set_cookie(
             key="access_token",
             value=access_token,
@@ -167,4 +168,11 @@ async def token_refresh(
 
         return TokenRefreshResponse(
             message="Token refreshed successfully",
+        )
+
+    else:
+        return TokenRefreshResponse(
+            message="Token refreshed successfully",
+            access=access_token,
+            refresh=refresh_token,
         )
