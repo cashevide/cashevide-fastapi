@@ -31,7 +31,7 @@ class LoginResponse(BaseModel):
 
 class TokenRefresh(BaseModel):
     platform: Literal["web", "mobile"] = "mobile"
-    refresh: str | None
+    refresh: str | None = None
 
 
 class TokenRefreshResponse(BaseModel):
