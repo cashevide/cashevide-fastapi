@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timedelta, timezone
 
 import jwt
@@ -20,7 +21,7 @@ def verify_password(plain_password: str, hash_password: str) -> bool:
     return pwd_context.verify(plain_password, hash_password)
 
 
-def create_access_token(user_id: str) -> str:
+def create_access_token(user_id: int) -> str:
     expire = datetime.now(timezone.utc) + timedelta(
         minutes=settings.jwt_access_token_expire_minutes
     )
@@ -32,12 +33,17 @@ def create_access_token(user_id: str) -> str:
     )
 
 
-def create_refresh_token(user_id: str) -> str:
+def create_refresh_token(user_id: int) -> str:
     expire = datetime.now(timezone.utc) + timedelta(
         days=settings.jwt_refresh_token_expire_days
     )
 
-    payload = {"sub": str(user_id), "exp": expire, "type": "refresh"}
+    payload = {
+        "sub": str(user_id),
+        "exp": expire,
+        "type": "refresh",
+        "jti": str(uuid.uuid4()),
+    }
 
     return jwt.encode(
         payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm
@@ -52,7 +58,7 @@ def decode_access_token(token: str) -> int:
     return int(payload["sub"])
 
 
-def decode_refresh_token(token: str) -> int:
+def decode_refresh_token(token: str) -> tuple[int, str]:
     payload = jwt.decode(
         token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm]
     )
@@ -60,4 +66,4 @@ def decode_refresh_token(token: str) -> int:
     if payload.get("type") != "refresh":
         raise jwt.InvalidTokenError("Not a refresh token")
 
-    return int(payload["sub"])
+    return int(payload["sub"]), payload["jti"]

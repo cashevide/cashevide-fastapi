@@ -6,7 +6,7 @@ from sqlalchemy import select
 
 from cashevide_api.config import settings
 from cashevide_api.database import get_db
-from cashevide_api.users.models import User
+from cashevide_api.users.models import User, BlacklistedToken
 from cashevide_api.users.schemas import (
     UserOut,
     UserCreate,
@@ -77,8 +77,8 @@ async def login(
     if user is None or not verify_password(payload.password, user.password):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    access_token = create_access_token(str(user.id))
-    refresh_token = create_refresh_token(str(user.id))
+    access_token = create_access_token(user.id)
+    refresh_token = create_refresh_token(user.id)
 
     if payload.platform == "web":
         response.set_cookie(
@@ -123,6 +123,7 @@ async def login(
 async def refresh_access_token(
     payload: TokenRefresh,
     response: Response,
+    db: AsyncSession = Depends(get_db),
     refresh_token_cookie: str | None = Cookie(default=None, alias="refresh_token"),
 ) -> TokenRefreshResponse:
 
@@ -138,12 +139,22 @@ async def refresh_access_token(
         raise HTTPException(status_code=400, detail="Refresh token is required")
 
     try:
-        user_id = decode_refresh_token(token=str(refresh_token))
+        user_id, jti = decode_refresh_token(token=str(refresh_token))
     except Exception:
         raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
 
-    access_token = create_access_token(user_id=str(user_id))
-    refresh_token = create_refresh_token(user_id=str(user_id))
+    is_blacklisted = await db.scalar(
+        select(BlacklistedToken).where(BlacklistedToken.jti == jti)
+    )
+
+    if is_blacklisted is not None:
+        raise HTTPException(status_code=401, detail="Refresh token has been revoked")
+
+    db.add(BlacklistedToken(jti=jti))
+    await db.commit()
+
+    access_token = create_access_token(user_id=user_id)
+    new_refresh_token = create_refresh_token(user_id=user_id)
 
     if platform == "web":
         response.set_cookie(
@@ -158,7 +169,7 @@ async def refresh_access_token(
 
         response.set_cookie(
             key="refresh_token",
-            value=refresh_token,
+            value=new_refresh_token,
             max_age=settings.jwt_refresh_token_expire_days * 24 * 60 * 60,
             httponly=True,
             secure=not settings.debug,
@@ -174,5 +185,5 @@ async def refresh_access_token(
         return TokenRefreshResponse(
             message="Token refreshed successfully",
             access=access_token,
-            refresh=refresh_token,
+            refresh=new_refresh_token,
         )
