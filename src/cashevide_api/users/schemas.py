@@ -10,6 +10,19 @@ class UserOut(BaseModel):
     username: str
 
 
+class UserProfileOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    user_id: int
+    full_name: str
+    profile_picture: str | None
+    phone_number: str
+    job_title: str
+    referral_code: str
+    referred_by_id: int | None
+    credit_points: int
+
+
 class UserCreate(BaseModel):
     email: EmailStr
     username: str
