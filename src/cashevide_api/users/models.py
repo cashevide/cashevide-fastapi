@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, DateTime, String, BigInteger
+from sqlalchemy import Boolean, DateTime, String, BigInteger, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from cashevide_api.database import Base
@@ -23,6 +23,24 @@ class User(Base):
     )
     last_login: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
+    )
+
+
+class UserProfile(Base):
+    __tablename__ = "users_userprofile"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("users_user.id", ondelete="CASCADE"), unique=True
+    )
+    profile_picture: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    full_name: Mapped[str] = mapped_column(String(200), default="")
+    phone_number: Mapped[str] = mapped_column(String(20), default="")
+    job_title: Mapped[str] = mapped_column(String(100), default="")
+    referral_code: Mapped[str] = mapped_column(String(50), unique=True, index=True)
+    credit_points: Mapped[int] = mapped_column(default=0)
+    referred_by_id: Mapped[int | None] = mapped_column(
+        BigInteger, ForeignKey("users_user.id", ondelete="SET NULL"), nullable=True
     )
 
 
