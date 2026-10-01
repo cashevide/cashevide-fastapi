@@ -9,4 +9,7 @@ done
 
 echo "PostgreSQL started!"
 
+echo "Running migrations..."
+/app/.venv/bin/alembic upgrade head
+
 exec "$@"

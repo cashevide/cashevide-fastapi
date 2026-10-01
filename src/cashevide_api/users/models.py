@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, DateTime, String
+from sqlalchemy import Boolean, DateTime, String, BigInteger
 from sqlalchemy.orm import Mapped, mapped_column
 
 from cashevide_api.database import Base
@@ -9,7 +9,7 @@ from cashevide_api.database import Base
 class User(Base):
     __tablename__ = "users_user"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     email: Mapped[str] = mapped_column(String(254), unique=True)
     username: Mapped[str] = mapped_column(String(150), unique=True)
     password: Mapped[str] = mapped_column(String(128))

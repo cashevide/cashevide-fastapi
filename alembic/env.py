@@ -20,6 +20,23 @@ config.set_main_option("sqlalchemy.url", settings.database_url)
 target_metadata = Base.metadata
 
 
+# NOTE: This is a temporary bridge for the Django → FastAPI migration.
+# Django's database currently has many tables (invoices_*, clients_*,
+# catalog_*, etc.) that don't have FastAPI/SQLAlchemy models yet. Without
+# this filter, Alembic would see those tables as "should be removed" and
+# generate migrations that DROP them — which would destroy production data.
+#
+# As each Django app gets ported to a FastAPI model (the way `users` was),
+# that table becomes known to Alembic and this filter stops affecting it.
+# Once every table has a corresponding model, this function will never
+# actually exclude anything — at that point it's safe to delete this
+# function entirely (and remove `include_object=include_object` below).
+def include_object(object, name, type_, reflected, compare_to):
+    if type_ == "table" and reflected and compare_to is None:
+        return False
+    return True
+
+
 def run_migrations_offline() -> None:
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
@@ -27,6 +44,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        include_object=include_object,
     )
 
     with context.begin_transaction():
@@ -34,7 +52,11 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection):
-    context.configure(connection=connection, target_metadata=target_metadata)
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        include_object=include_object,
+    )
 
     with context.begin_transaction():
         context.run_migrations()
