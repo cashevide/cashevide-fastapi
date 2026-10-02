@@ -6,7 +6,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from cashevide_api.admin import AdminAuth, register_admin_views
 from cashevide_api.config import settings
 from cashevide_api.database import engine
-from cashevide_api.users.router import router as users_router
+from cashevide_api.users.routers import router as users_router
 
 app = FastAPI(title="Cashevide API", debug=settings.debug)
 
