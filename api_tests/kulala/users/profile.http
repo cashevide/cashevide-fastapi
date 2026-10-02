@@ -8,12 +8,11 @@ Authorization: Bearer {{token}}
 ### PATCH Profile
 
 PATCH {{base_url}}/users/profile/me/ HTTP/1.1
-Content-Type: application/json
+Content-Type: multipart/form-data
 Authorization: Bearer {{token}}
 
 {
-  "full_name": "Noufal",
-  "profile_picture":"",
+  "full_name": "Noufal KA",
   "phone_number": "2349234",
-  "job_title": "Graphic designer"
+  "job_title": "software engineer"
 }
