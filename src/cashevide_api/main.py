@@ -1,4 +1,6 @@
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, FastAPI, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqladmin import Admin
 from starlette.middleware.sessions import SessionMiddleware
@@ -31,6 +33,19 @@ admin = Admin(
     app, engine, authentication_backend=AdminAuth(secret_key=settings.jwt_secret_key)
 )
 register_admin_views(admin)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(
+    request: Request, exc: RequestValidationError
+) -> JSONResponse:
+    errors: dict[str, list[str]] = {}
+
+    for error in exc.errors():
+        field = str(error["loc"][-1])
+        errors.setdefault(field, []).append(error["msg"])
+
+    return JSONResponse(status_code=422, content=errors)
 
 
 @app.get("/")
