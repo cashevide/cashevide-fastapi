@@ -2,6 +2,7 @@ FROM python:3.14-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV UV_PROJECT_ENVIRONMENT=/usr/local
 
 RUN apt-get update && apt-get install -y \
   netcat-openbsd \
@@ -14,12 +15,13 @@ RUN addgroup --system cashevide && adduser --system --group cashevide
 WORKDIR /app
 
 COPY pyproject.toml uv.lock ./
-RUN uv pip install --system --no-cache -r pyproject.toml
+RUN uv sync --frozen --no-dev --no-install-project
 
 COPY --chown=cashevide:cashevide ./entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 COPY --chown=cashevide:cashevide . .
+RUN uv sync --frozen --no-dev
 
 USER cashevide
 
