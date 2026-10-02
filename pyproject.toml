@@ -12,6 +12,7 @@ dependencies = [
   "passlib>=1.7.4",
   "pydantic-settings>=2.15.0",
   "pyjwt>=2.15.0",
+  "sqladmin>=0.32.0",
   "sqlalchemy>=2.0.54",
 ]
 
