@@ -14,13 +14,12 @@ RUN addgroup --system cashevide && adduser --system --group cashevide
 WORKDIR /app
 
 COPY pyproject.toml uv.lock ./
-RUN uv sync --frozen --no-dev --no-install-project --system
+RUN uv pip install --system --no-cache -r pyproject.toml
 
 COPY --chown=cashevide:cashevide ./entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 COPY --chown=cashevide:cashevide . .
-RUN uv sync --frozen --no-dev --system
 
 USER cashevide
 
