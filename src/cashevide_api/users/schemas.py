@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from typing import Literal
 
 
@@ -21,6 +21,15 @@ class UserProfileOut(BaseModel):
     referral_code: str
     referred_by_id: int | None
     credit_points: int | None
+
+
+class UserProfileUpdate(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    full_name: str | None = Field(default=None, min_length=1)
+    profile_picture: str | None = None
+    phone_number: str | None = None
+    job_title: str | None = None
 
 
 class UserCreate(BaseModel):

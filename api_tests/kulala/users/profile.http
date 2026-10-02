@@ -4,3 +4,16 @@
 GET {{base_url}}/users/profile/me HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{token}}
+
+### PATCH Profile
+
+PATCH {{base_url}}/users/profile/me/ HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "full_name": "Noufal",
+  "profile_picture":"",
+  "phone_number": "2349234",
+  "job_title": "Graphic designer"
+}
