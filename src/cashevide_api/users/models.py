@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, DateTime, String, BigInteger, ForeignKey
+
+from sqlalchemy import Boolean, DateTime, String, BigInteger, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from cashevide_api.database import Base
@@ -52,3 +53,21 @@ class BlacklistedToken(Base):
     blacklisted_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
+
+
+class UserBusinessProfile(Base):
+    __tablename__ = "users_userbusinessprofile"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("users_user.id", ondelete="CASCADE"), unique=True
+    )
+    business_name: Mapped[str] = mapped_column(String(255), default="")
+    logo: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    gst_number: Mapped[str] = mapped_column(String(15), default="")
+    vat_number: Mapped[str] = mapped_column(String(15), default="")
+    address: Mapped[str] = mapped_column(Text, default="")
+    phone_number: Mapped[str] = mapped_column(String(20), default="")
+    website: Mapped[str] = mapped_column(String(200), default="")
+    currency: Mapped[str] = mapped_column(String(3), default="")
+    business_email: Mapped[str] = mapped_column(String(254), default="")
