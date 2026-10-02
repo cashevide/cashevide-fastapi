@@ -4,9 +4,11 @@ POST {{base_url}}/users/signup
 Content-Type: application/json
 
 {
-  "email": "test11@email.com",
+  "email": "test15@email.com",
+  "full_name": "Test14",
   "password": "noufal123",
-  "username": "test11"
+  "platform": "mobile",
+  "username": "test15"
 }
 
 
@@ -17,8 +19,8 @@ POST {{base_url}}/users/login
 Content-Type: application/json
 
 {
-  "email": "test@email.com",
-  "password": "noufalka123",
+  "email": "test14@email.com",
+  "password": "noufal123",
   "platform": "mobile"
 }
 

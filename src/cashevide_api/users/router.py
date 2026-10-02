@@ -6,7 +6,7 @@ from sqlalchemy import select
 
 from cashevide_api.config import settings
 from cashevide_api.database import get_db
-from cashevide_api.users.models import User, BlacklistedToken
+from cashevide_api.users.models import User, BlacklistedToken, UserProfile
 from cashevide_api.users.schemas import (
     UserOut,
     UserCreate,
@@ -14,6 +14,7 @@ from cashevide_api.users.schemas import (
     LoginResponse,
     TokenRefreshResponse,
     TokenRefresh,
+    UserProfileOut,
 )
 from cashevide_api.security import (
     hash_password,
@@ -23,13 +24,9 @@ from cashevide_api.security import (
     decode_refresh_token,
 )
 from cashevide_api.dependencies import get_current_user
+from cashevide_api.users.utils import generate_unique_referral_code
 
 router = APIRouter(prefix="/users", tags=["users"])
-
-
-@router.get("/profile/me", response_model=UserOut)
-async def get_me(current_user: User = Depends(get_current_user)) -> User:
-    return current_user
 
 
 @router.post("/signup", response_model=UserOut, status_code=201)
@@ -113,6 +110,32 @@ async def login(
             access=access_token,
             refresh=refresh_token,
         )
+
+
+@router.get(
+    "/profile/me",
+    response_model=UserProfileOut,
+)
+async def get_user_profile(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> UserProfile:
+
+    user_profile = await db.scalar(
+        select(UserProfile).where(UserProfile.user_id == current_user.id)
+    )
+
+    if user_profile is None:
+        user_profile = UserProfile(
+            user_id=current_user.id,
+            referral_code=await generate_unique_referral_code(db),
+        )
+
+        db.add(user_profile)
+        await db.commit()
+        await db.refresh(user_profile)
+
+    return user_profile
 
 
 @router.post(

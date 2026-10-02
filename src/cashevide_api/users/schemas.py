@@ -16,11 +16,11 @@ class UserProfileOut(BaseModel):
     user_id: int
     full_name: str
     profile_picture: str | None
-    phone_number: str
-    job_title: str
+    phone_number: str | None
+    job_title: str | None
     referral_code: str
     referred_by_id: int | None
-    credit_points: int
+    credit_points: int | None
 
 
 class UserCreate(BaseModel):
