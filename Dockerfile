@@ -14,13 +14,13 @@ RUN addgroup --system cashevide && adduser --system --group cashevide
 WORKDIR /app
 
 COPY pyproject.toml uv.lock ./
-RUN uv sync --frozen --no-dev --no-install-project
+RUN uv sync --frozen --no-dev --no-install-project --system
 
 COPY --chown=cashevide:cashevide ./entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 COPY --chown=cashevide:cashevide . .
-RUN uv sync --frozen --no-dev
+RUN uv sync --frozen --no-dev --system
 
 USER cashevide
 
@@ -28,4 +28,4 @@ ENTRYPOINT ["/entrypoint.sh"]
 
 EXPOSE 8000
 
-CMD ["/app/.venv/bin/uvicorn", "cashevide_api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "cashevide_api.main:app", "--host", "0.0.0.0", "--port", "8000"]

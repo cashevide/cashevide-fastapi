@@ -10,6 +10,9 @@ done
 echo "PostgreSQL started!"
 
 echo "Running migrations..."
-/app/.venv/bin/alembic upgrade head
+alembic upgrade head
+
+echo "Ensuring admin user exists..."
+python -m cashevide_api.create_superuser
 
 exec "$@"

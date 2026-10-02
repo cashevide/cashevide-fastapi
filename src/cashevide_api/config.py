@@ -24,6 +24,10 @@ class Settings(BaseSettings):
 
     cors_allowed_origins: str = ""
 
+    admin_email: str | None = None
+    admin_username: str = "admin"
+    admin_password: str | None = None
+
     @property
     def cors_origins_list(self) -> list[str]:
         if not self.cors_allowed_origins:
