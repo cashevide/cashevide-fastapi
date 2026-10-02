@@ -29,6 +29,7 @@ async def get_user_profile(
     if user_profile is None:
         user_profile = UserProfile(
             user_id=current_user.id,
+            referral_code=await generate_unique_referral_code(db),
         )
 
         db.add(user_profile)
