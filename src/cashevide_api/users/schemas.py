@@ -23,6 +23,21 @@ class UserProfileOut(BaseModel):
     credit_points: int | None
 
 
+class UserBusinessProfileOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    user_id: int
+    business_name: str | None
+    logo: str | None
+    gst_number: str | None
+    vat_number: str | None
+    address: str | None
+    phone_number: str | None
+    website: str | None
+    currency: str | None
+    business_email: str | None
+
+
 # class UserProfileUpdate(BaseModel):
 #     model_config = ConfigDict(from_attributes=True)
 #

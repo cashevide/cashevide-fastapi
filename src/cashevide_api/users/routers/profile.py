@@ -5,16 +5,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from cashevide_api.database import get_db
-from cashevide_api.users.models import User, UserProfile
-from cashevide_api.users.schemas import UserProfileOut
+from cashevide_api.users.models import User, UserProfile, UserBusinessProfile
+from cashevide_api.users.schemas import UserProfileOut, UserBusinessProfileOut
 from cashevide_api.dependencies import get_current_user
 from cashevide_api.users.utils import generate_unique_referral_code
 
-router = APIRouter(prefix="/profile", tags=["profile"])
+router = APIRouter(tags=["profile"])
 
 
 @router.get(
-    "/me",
+    "/profile/me",
     response_model=UserProfileOut,
 )
 async def get_user_profile(
@@ -39,7 +39,7 @@ async def get_user_profile(
     return user_profile
 
 
-@router.patch("/me", response_model=UserProfileOut)
+@router.patch("/profile/me", response_model=UserProfileOut)
 async def update_user_profile(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -71,3 +71,25 @@ async def update_user_profile(
     await db.refresh(user_profile)
 
     return user_profile
+
+
+@router.get("/business-profile/me", response_model=UserBusinessProfileOut)
+async def get_user_business_profile(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> UserBusinessProfile:
+
+    user_business_profile = await db.scalar(
+        select(UserBusinessProfile).where(
+            UserBusinessProfile.user_id == current_user.id
+        )
+    )
+
+    if user_business_profile is None:
+        user_business_profile = UserBusinessProfile(user_id=current_user.id)
+
+        db.add(user_business_profile)
+        await db.commit()
+        await db.refresh(user_business_profile)
+
+    return user_business_profile

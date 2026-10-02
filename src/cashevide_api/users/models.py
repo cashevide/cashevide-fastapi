@@ -45,16 +45,6 @@ class UserProfile(Base):
     )
 
 
-class BlacklistedToken(Base):
-    __tablename__ = "blacklisted_tokens"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    jti: Mapped[str] = mapped_column(String(255), unique=True, index=True)
-    blacklisted_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
-
-
 class UserBusinessProfile(Base):
     __tablename__ = "users_userbusinessprofile"
 
@@ -71,3 +61,13 @@ class UserBusinessProfile(Base):
     website: Mapped[str] = mapped_column(String(200), default="")
     currency: Mapped[str] = mapped_column(String(3), default="")
     business_email: Mapped[str] = mapped_column(String(254), default="")
+
+
+class BlacklistedToken(Base):
+    __tablename__ = "blacklisted_tokens"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    jti: Mapped[str] = mapped_column(String(255), unique=True, index=True)
+    blacklisted_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
