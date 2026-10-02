@@ -1,3 +1,4 @@
+from fastapi import Form
 from pydantic import BaseModel, ConfigDict, EmailStr
 from typing import Literal
 
@@ -23,6 +24,13 @@ class UserProfileOut(BaseModel):
     credit_points: int | None
 
 
+class UserProfileUpdate(BaseModel):
+    full_name: str | None = Form(default=None, min_length=1)
+    # profile_picture: str | None = Form(default=None)
+    phone_number: str | None = Form(default=None)
+    job_title: str | None = Form(default=None)
+
+
 class UserBusinessProfileOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -38,13 +46,16 @@ class UserBusinessProfileOut(BaseModel):
     business_email: str | None
 
 
-# class UserProfileUpdate(BaseModel):
-#     model_config = ConfigDict(from_attributes=True)
-#
-#     full_name: str | None = Field(default=None, min_length=1)
-#     profile_picture: str | None = None
-#     phone_number: str | None = None
-#     job_title: str | None = None
+class UserBusinessProfileUpdate(BaseModel):
+    business_name: str | None = Form(default=None)
+    # logo: str | None = Form(default=None)
+    gst_number: str | None = Form(default=None)
+    vat_number: str | None = Form(default=None)
+    address: str | None = Form(default=None)
+    phone_number: str | None = Form(default=None)
+    website: str | None = Form(default=None)
+    currency: str | None = Form(default=None)
+    business_email: str | None = Form(default=None)
 
 
 class UserCreate(BaseModel):
