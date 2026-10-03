@@ -11,33 +11,16 @@ class UserOut(BaseModel):
 
 
 class UserProfileOut(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
     user_id: int
     email: str
     username: str
     full_name: str
     profile_picture: str | None
-    phone_number: str | None
-    job_title: str | None
+    phone_number: str
+    job_title: str
     referral_code: str
     referred_by: int | None
-    credit_points: int | None
-
-
-# class UserProfileOut(BaseModel):
-#     model_config = ConfigDict(from_attributes=True)
-#
-#     user_id: int
-#     email: str
-#     username: str
-#     full_name: str
-#     profile_picture: str | None = None
-#     phone_number: str | None
-#     job_title: str | None
-#     referral_code: str | None = None
-#     referred_by_id: int | None = None
-#     credit_points: int | None = None
+    credit_points: int
 
 
 class UserProfileUpdate(BaseModel):
