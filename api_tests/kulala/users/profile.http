@@ -12,9 +12,9 @@ Content-Type: multipart/form-data
 Authorization: Bearer {{token}}
 
 {
-  "full_name": "Noufal K A",
+  "full_name": "Noufal KA",
   "phone_number": "2349234",
-  "job_title": "software Engineer"
+  "job_title": "Softwar Engineer"
 }
 
 
@@ -34,9 +34,9 @@ Authorization: Bearer {{token}}
 
 {
   "address": "Kodassery House, PO Madavana, Kodungallur, Eriyad, Thrissur, 680666",
-  "business_name": "UIkart",
+  "business_name": "Noufal",
   "currency": "INR",
-  "gst_number": "",
+  "gst_number": "noufal.me",
   "business_email": "uikart@email.com",
   "phone_number": "+919746469319",
   "vat_number": ""

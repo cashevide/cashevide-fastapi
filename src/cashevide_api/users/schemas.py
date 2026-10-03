@@ -1,5 +1,4 @@
-from fastapi import Form
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from typing import Literal
 
 
@@ -25,10 +24,10 @@ class UserProfileOut(BaseModel):
 
 
 class UserProfileUpdate(BaseModel):
-    full_name: str | None = Form(default=None, min_length=1)
-    # profile_picture: str | None = Form(default=None)
-    phone_number: str | None = Form(default=None)
-    job_title: str | None = Form(default=None)
+    full_name: str | None = Field(default=None, min_length=3)
+    # profile_picture: str | None = None
+    phone_number: str | None = None
+    job_title: str | None = None
 
 
 class UserBusinessProfileOut(BaseModel):
@@ -47,15 +46,15 @@ class UserBusinessProfileOut(BaseModel):
 
 
 class UserBusinessProfileUpdate(BaseModel):
-    business_name: str | None = Form(default=None)
-    # logo: str | None = Form(default=None)
-    gst_number: str | None = Form(default=None)
-    vat_number: str | None = Form(default=None)
-    address: str | None = Form(default=None)
-    phone_number: str | None = Form(default=None)
-    website: str | None = Form(default=None)
-    currency: str | None = Form(default=None)
-    business_email: str | None = Form(default=None)
+    business_name: str | None = Field(default=None)
+    # logo: str | None = Field(default=None)
+    gst_number: str | None = Field(default=None)
+    vat_number: str | None = Field(default=None)
+    address: str | None = Field(default=None)
+    phone_number: str | None = Field(default=None)
+    website: str | None = Field(default=None)
+    currency: str | None = Field(default=None)
+    business_email: str | None = Field(default=None)
 
 
 class UserCreate(BaseModel):
