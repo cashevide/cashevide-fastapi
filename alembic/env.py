@@ -8,7 +8,12 @@ from alembic import context
 
 from cashevide_api.config import settings
 from cashevide_api.database import Base
-from cashevide_api.users.models import BlacklistedToken, User, UserProfile  # noqa: F401
+from cashevide_api.users.models import (
+    BlacklistedToken,  # noqa: F401
+    User,  # noqa: F401
+    UserProfile,  # noqa: F401
+    UserBusinessProfile,  # noqa: F401
+)
 
 config = context.config
 

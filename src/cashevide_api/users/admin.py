@@ -1,6 +1,11 @@
 from sqladmin import ModelView
 
-from cashevide_api.users.models import User, UserProfile, BlacklistedToken
+from cashevide_api.users.models import (
+    User,
+    UserProfile,
+    BlacklistedToken,
+    UserBusinessProfile,
+)
 
 
 class UserAdmin(ModelView, model=User):
@@ -18,6 +23,21 @@ class UserProfileAdmin(ModelView, model=UserProfile):
         UserProfile.credit_points,
     ]
     column_searchable_list = [UserProfile.referral_code]
+
+
+class UserBusinessProfileAdmin(ModelView, model=UserBusinessProfile):
+    column_list = [
+        UserBusinessProfile.user_id,
+        UserBusinessProfile.business_name,
+        UserBusinessProfile.logo,
+        UserBusinessProfile.gst_number,
+        UserBusinessProfile.vat_number,
+        UserBusinessProfile.address,
+        UserBusinessProfile.phone_number,
+        UserBusinessProfile.website,
+        UserBusinessProfile.currency,
+        UserBusinessProfile.business_email,
+    ]
 
 
 class BlacklistedTokenAdmin(ModelView, model=BlacklistedToken):

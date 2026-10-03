@@ -5,7 +5,12 @@ from sqlalchemy import select
 
 from cashevide_api.database import AsyncSessionLocal
 from cashevide_api.security import verify_password
-from cashevide_api.users.admin import BlacklistedTokenAdmin, UserAdmin, UserProfileAdmin
+from cashevide_api.users.admin import (
+    BlacklistedTokenAdmin,
+    UserAdmin,
+    UserProfileAdmin,
+    UserBusinessProfileAdmin,
+)
 from cashevide_api.users.models import User
 
 
@@ -39,3 +44,4 @@ def register_admin_views(admin: Admin):
     admin.add_view(UserAdmin)
     admin.add_view(UserProfileAdmin)
     admin.add_view(BlacklistedTokenAdmin)
+    admin.add_view(UserBusinessProfileAdmin)
