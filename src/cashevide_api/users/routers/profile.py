@@ -1,4 +1,4 @@
-from typing import Annotated, Literal
+from typing import Annotated
 from fastapi import APIRouter, Depends, Form
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,6 +19,21 @@ from cashevide_api.users.utils import generate_unique_referral_code
 router = APIRouter(tags=["profile"])
 
 
+def build_profile_out(profile: UserProfile, user: User) -> UserProfileOut:
+    return UserProfileOut(
+        user_id=profile.user_id,
+        email=user.email,
+        username=user.username,
+        full_name=profile.full_name,
+        profile_picture=profile.profile_picture,
+        phone_number=profile.phone_number,
+        job_title=profile.job_title,
+        referral_code=profile.referral_code,
+        referred_by=profile.referred_by_id,
+        credit_points=profile.credit_points,
+    )
+
+
 @router.get(
     "/profile/me",
     response_model=UserProfileOut,
@@ -26,7 +41,7 @@ router = APIRouter(tags=["profile"])
 async def get_user_profile(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
-) -> UserProfile:
+) -> UserProfileOut:
 
     user_profile = await db.scalar(
         select(UserProfile).where(UserProfile.user_id == current_user.id)
@@ -42,7 +57,7 @@ async def get_user_profile(
         await db.commit()
         await db.refresh(user_profile)
 
-    return user_profile
+    return build_profile_out(user_profile, current_user)
 
 
 @router.patch("/profile/me", response_model=UserProfileOut)
@@ -50,7 +65,7 @@ async def update_user_profile(
     payload: Annotated[UserProfileUpdate, Form()],
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
-) -> UserProfile:
+) -> UserProfileOut:
 
     user_profile = await db.scalar(
         select(UserProfile).where(UserProfile.user_id == current_user.id)
@@ -72,7 +87,7 @@ async def update_user_profile(
     await db.commit()
     await db.refresh(user_profile)
 
-    return user_profile
+    return build_profile_out(user_profile, current_user)
 
 
 @router.get("/business-profile/me", response_model=UserBusinessProfileOut)

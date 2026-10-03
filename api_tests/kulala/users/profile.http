@@ -12,7 +12,7 @@ Content-Type: multipart/form-data
 Authorization: Bearer {{token}}
 
 {
-  "full_name": "Noufal KA",
+  "full_name": "Noufal",
   "phone_number": "2349234",
   "job_title": "Softwar Engineer"
 }
