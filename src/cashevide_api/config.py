@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import model_validator
 
 
 class Settings(BaseSettings):
@@ -24,9 +25,33 @@ class Settings(BaseSettings):
 
     cors_allowed_origins: str = ""
 
+    use_s3_storage: bool = False
+    aws_access_key_id: str | None = None
+    aws_secret_access_key: str | None = None
+    aws_storage_bucket_name: str | None = None
+    aws_s3_endpoint_url: str | None = None
+    aws_s3_custom_domain: str | None = None
+    media_root: str = "media"
+    media_base_url: str = "http://localhost:8001/media/"
+
     admin_email: str | None = None
     admin_username: str = "admin"
     admin_password: str | None = None
+
+    @model_validator(mode="after")
+    def check_s3_settings(self) -> "Settings":
+        if self.use_s3_storage:
+            required = {
+                "AWS_ACCESS_KEY_ID": self.aws_access_key_id,
+                "AWS_SECRET_ACCESS_KEY": self.aws_secret_access_key,
+                "AWS_STORAGE_BUCKET_NAME": self.aws_storage_bucket_name,
+                "AWS_S3_ENDPOINT_URL": self.aws_s3_endpoint_url,
+                "AWS_S3_CUSTOM_DOMAIN": self.aws_s3_custom_domain,
+            }
+            missing = [name for name, value in required.items() if not value]
+            if missing:
+                raise ValueError(f"USE_S3_STORAGE=True needs: {', '.join(missing)}")
+        return self
 
     @property
     def cors_origins_list(self) -> list[str]:
