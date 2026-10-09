@@ -221,3 +221,5 @@ __marimo__/
 docker-compose.override.yml
 
 temp.py
+
+/media/

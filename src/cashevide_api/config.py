@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     aws_s3_custom_domain: str | None = None
     media_root: str = "media"
     media_base_url: str = "http://localhost:8001/media/"
+    max_image_upload_mb: int = 10
 
     admin_email: str | None = None
     admin_username: str = "admin"

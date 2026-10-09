@@ -1,10 +1,10 @@
 from sqladmin import ModelView
 
 from cashevide_api.users.models import (
-    User,
-    UserProfile,
     BlacklistedToken,
+    User,
     UserBusinessProfile,
+    UserProfile,
 )
 
 

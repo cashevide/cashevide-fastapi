@@ -7,9 +7,21 @@ from typing import Literal
 import boto3
 from botocore.config import Config
 from fastapi import UploadFile
-from PIL import Image
+from PIL import Image, ImageOps, UnidentifiedImageError
 
 from cashevide_api.config import settings
+
+
+class ImageError(Exception):
+    status_code: int = 422
+
+
+class InvalidImageError(ImageError):
+    status_code = 422
+
+
+class ImageTooLargeError(ImageError):
+    status_code = 413
 
 
 def _s3():
@@ -26,7 +38,15 @@ def _s3():
 def process_image(
     data: bytes, fmt: Literal["jpg", "png"], max_size: int = 512
 ) -> tuple[bytes, str]:
-    img = Image.open(io.BytesIO(data))
+    try:
+        img = Image.open(io.BytesIO(data))
+        img = ImageOps.exif_transpose(img)
+        img.load()
+    except (UnidentifiedImageError, Image.DecompressionBombError, OSError) as exc:
+        raise InvalidImageError(
+            "Upload a valid image. The file you uploaded was either not an "
+            "image or a corrupted image."
+        ) from exc
 
     if fmt == "jpg":
         if img.mode != "RGB":
@@ -71,6 +91,12 @@ async def save_image(
     fmt: Literal["jpg", "png"],
     max_size: int = 512,
 ) -> str:
+    max_bytes = settings.max_image_upload_mb * 1024 * 1024
+    data = await upload.read(max_bytes + 1)
+    if len(data) > max_bytes:
+        raise ImageTooLargeError(
+            f"Image is too large. Maximum size is {settings.max_image_upload_mb} MB."
+        )
     data = await upload.read()
     processed, content_type = await asyncio.to_thread(
         process_image, data, fmt, max_size

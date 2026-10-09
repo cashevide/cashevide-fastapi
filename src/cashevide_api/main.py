@@ -9,6 +9,11 @@ from cashevide_api.admin import AdminAuth, register_admin_views
 from cashevide_api.config import settings
 from cashevide_api.database import engine
 from cashevide_api.users.routers import router as users_router
+from pathlib import Path
+
+from fastapi.staticfiles import StaticFiles
+
+from cashevide_api.storage import ImageError
 
 app = FastAPI(title="Cashevide API", debug=settings.debug)
 
@@ -28,6 +33,11 @@ api_router.include_router(users_router)
 
 app.include_router(api_router)
 
+if not settings.use_s3_storage:
+    media_dir = Path(settings.media_root)
+    media_dir.mkdir(parents=True, exist_ok=True)
+    app.mount("/media", StaticFiles(directory=media_dir), name="media")
+
 
 admin = Admin(
     app, engine, authentication_backend=AdminAuth(secret_key=settings.jwt_secret_key)
@@ -45,7 +55,7 @@ async def validation_exception_handler(
         field = str(error["loc"][-1])
         errors.setdefault(field, []).append(error["msg"])
 
-    return JSONResponse(status_code=422, content=errors)
+    return JSONResponse(status_code=exc.status_code, content={"detail": str(exc)})
 
 
 @app.get("/")
