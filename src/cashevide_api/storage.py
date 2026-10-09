@@ -97,7 +97,6 @@ async def save_image(
         raise ImageTooLargeError(
             f"Image is too large. Maximum size is {settings.max_image_upload_mb} MB."
         )
-    data = await upload.read()
     processed, content_type = await asyncio.to_thread(
         process_image, data, fmt, max_size
     )

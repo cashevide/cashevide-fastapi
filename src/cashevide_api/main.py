@@ -55,6 +55,11 @@ async def validation_exception_handler(
         field = str(error["loc"][-1])
         errors.setdefault(field, []).append(error["msg"])
 
+    return JSONResponse(status_code=422, content=errors)
+
+
+@app.exception_handler(ImageError)
+async def image_error_handler(request: Request, exc: ImageError) -> JSONResponse:
     return JSONResponse(status_code=exc.status_code, content={"detail": str(exc)})
 
 
