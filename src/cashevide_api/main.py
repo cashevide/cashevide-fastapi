@@ -1,19 +1,18 @@
+from pathlib import Path
+
 from fastapi import APIRouter, FastAPI, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from sqladmin import Admin
 from starlette.middleware.sessions import SessionMiddleware
 
 from cashevide_api.admin import AdminAuth, register_admin_views
 from cashevide_api.config import settings
 from cashevide_api.database import engine
-from cashevide_api.users.routers import router as users_router
-from pathlib import Path
-
-from fastapi.staticfiles import StaticFiles
-
 from cashevide_api.storage import ImageError
+from cashevide_api.users.routers import router as users_router
 
 app = FastAPI(title="Cashevide API", debug=settings.debug)
 
