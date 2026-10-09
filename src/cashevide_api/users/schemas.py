@@ -1,6 +1,5 @@
-from typing import Literal
-
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from typing import Literal
 
 
 class UserOut(BaseModel):
@@ -16,7 +15,7 @@ class UserProfileOut(BaseModel):
     email: str
     username: str
     full_name: str
-    # profile_picture: str | None
+    profile_picture: str | None
     phone_number: str
     job_title: str
     referral_code: str
@@ -26,7 +25,7 @@ class UserProfileOut(BaseModel):
 
 class UserProfileUpdate(BaseModel):
     full_name: str | None = Field(default=None, min_length=3)
-    profile_picture: str | None = None
+    # profile_picture: str | None = None
     phone_number: str | None = None
     job_title: str | None = None
 
@@ -36,7 +35,7 @@ class UserBusinessProfileOut(BaseModel):
 
     user_id: int
     business_name: str | None
-    # logo: str | None
+    logo: str | None
     gst_number: str | None
     vat_number: str | None
     address: str | None
@@ -48,7 +47,7 @@ class UserBusinessProfileOut(BaseModel):
 
 class UserBusinessProfileUpdate(BaseModel):
     business_name: str | None = Field(default=None)
-    logo: str | None = Field(default=None)
+    # logo: str | None = Field(default=None)
     gst_number: str | None = Field(default=None)
     vat_number: str | None = Field(default=None)
     address: str | None = Field(default=None)
