@@ -25,7 +25,7 @@ class UserProfileOut(BaseModel):
 
 class UserProfileUpdate(BaseModel):
     full_name: str | None = Field(default=None, min_length=3)
-    # profile_picture: str | None = None
+    profile_picture: str | None = None
     phone_number: str | None = None
     job_title: str | None = None
 
@@ -47,7 +47,7 @@ class UserBusinessProfileOut(BaseModel):
 
 class UserBusinessProfileUpdate(BaseModel):
     business_name: str | None = Field(default=None)
-    # logo: str | None = Field(default=None)
+    logo: str | None = Field(default=None)
     gst_number: str | None = Field(default=None)
     vat_number: str | None = Field(default=None)
     address: str | None = Field(default=None)
