@@ -155,4 +155,4 @@ async def update_user_business_profile(
     await db.commit()
     await db.refresh(user_business_profile)
 
-    return build_business_profile_out(UserBusinessProfileOut)
+    return build_business_profile_out(user_business_profile)
