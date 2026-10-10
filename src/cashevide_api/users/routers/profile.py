@@ -1,3 +1,4 @@
+import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Form
@@ -6,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from cashevide_api.database import get_db
 from cashevide_api.dependencies import get_current_user
-from cashevide_api.storage import media_url
+from cashevide_api.storage import delete_image, media_url, save_image
 from cashevide_api.users.models import User, UserBusinessProfile, UserProfile
 from cashevide_api.users.schemas import (
     UserBusinessProfileOut,
@@ -15,6 +16,8 @@ from cashevide_api.users.schemas import (
     UserProfileUpdate,
 )
 from cashevide_api.users.utils import generate_unique_referral_code
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["profile"])
 
@@ -98,11 +101,38 @@ async def update_user_profile(
 
     update_data = payload.model_dump(exclude_unset=True)
 
+    old_key = user_profile.profile_picture
+    new_key: str | None = None
+
+    if "profile_picture" in update_data:
+        picture = update_data.pop("profile_picture")
+
+        if picture is None or isinstance(picture, str):
+            user_profile.profile_picture = None
+
+        else:
+            new_key = await save_image(
+                upload=picture, folder="profile_pictures", fmt="jpg"
+            )
+            user_profile.profile_picture = new_key
+
     for field, value in update_data.items():
         setattr(user_profile, field, value)
 
-    await db.commit()
+    try:
+        await db.commit()
+    except Exception:
+        if new_key:
+            await delete_image(new_key)
+        raise
+
     await db.refresh(user_profile)
+
+    if old_key and old_key != user_profile.profile_picture:
+        try:
+            await delete_image(old_key)
+        except Exception:
+            logger.exception("Could not delete old profile picture %s", old_key)
 
     return build_profile_out(user_profile, current_user)
 
