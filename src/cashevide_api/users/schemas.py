@@ -60,7 +60,7 @@ class UserBusinessProfileOut(BaseModel):
 
 class UserBusinessProfileUpdate(BaseModel):
     business_name: str | None = Field(default=None)
-    # logo: str | None = Field(default=None)
+    logo: UploadFile | str | None = Field(default=None)
     gst_number: str | None = Field(default=None)
     vat_number: str | None = Field(default=None)
     address: str | None = Field(default=None)
@@ -68,6 +68,17 @@ class UserBusinessProfileUpdate(BaseModel):
     website: str | None = Field(default=None)
     currency: str | None = Field(default=None)
     business_email: str | None = Field(default=None)
+
+    @field_validator("logo")
+    @classmethod
+    def only_file_or_empty(cls, value: UploadFile | str | None):
+        if isinstance(value, str) and value != "":
+            raise PydanticCustomError(
+                "not_a_file",
+                "The submitted data was not a file. "
+                "Check the encoding type on the form.",
+            )
+        return value
 
 
 class UserCreate(BaseModel):
