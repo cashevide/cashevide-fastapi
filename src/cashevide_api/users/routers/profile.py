@@ -1,7 +1,7 @@
 import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Form, UploadFile
+from fastapi import APIRouter, Depends, Form
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
