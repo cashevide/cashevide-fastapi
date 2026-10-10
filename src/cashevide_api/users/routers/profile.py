@@ -112,7 +112,10 @@ async def update_user_profile(
 
         else:
             new_key = await save_image(
-                upload=picture, folder="profile_pictures", fmt="jpg"
+                upload=picture,
+                folder="profile_pictures",
+                fmt="jpg",
+                field="profile_picture",
             )
             user_profile.profile_picture = new_key
 

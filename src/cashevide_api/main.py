@@ -59,7 +59,8 @@ async def validation_exception_handler(
 
 @app.exception_handler(ImageError)
 async def image_error_handler(request: Request, exc: ImageError) -> JSONResponse:
-    return JSONResponse(status_code=exc.status_code, content={"detail": str(exc)})
+    content = {exc.field: [str(exc)]} if exc.field else {"detail": str(exc)}
+    return JSONResponse(status_code=exc.status_code, content=content)
 
 
 @app.get("/")

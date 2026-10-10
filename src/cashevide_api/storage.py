@@ -1,4 +1,5 @@
 import asyncio
+from dataclasses import field
 import io
 import uuid
 from pathlib import Path
@@ -14,6 +15,10 @@ from cashevide_api.config import settings
 
 class ImageError(Exception):
     status_code: int = 422
+
+    def __init__(self, message: str, field: str | None = None):
+        super().__init__(message)
+        self.field = field
 
 
 class InvalidImageError(ImageError):
@@ -90,16 +95,22 @@ async def save_image(
     folder: str,
     fmt: Literal["jpg", "png"],
     max_size: int = 512,
+    field: str | None = None,
 ) -> str:
-    max_bytes = settings.max_image_upload_mb * 1024 * 1024
-    data = await upload.read(max_bytes + 1)
-    if len(data) > max_bytes:
-        raise ImageTooLargeError(
-            f"Image is too large. Maximum size is {settings.max_image_upload_mb} MB."
+    try:
+        max_bytes = settings.max_image_upload_mb * 1024 * 1024
+        data = await upload.read(max_bytes + 1)
+        if len(data) > max_bytes:
+            raise ImageTooLargeError(
+                f"Image is too large. Maximum size is {settings.max_image_upload_mb} MB."
+            )
+        processed, content_type = await asyncio.to_thread(
+            process_image, data, fmt, max_size
         )
-    processed, content_type = await asyncio.to_thread(
-        process_image, data, fmt, max_size
-    )
+    except ImageError as exc:
+        exc.field = field
+        raise
+
     key = f"{folder}/{uuid.uuid4().hex}.{fmt}"
     await asyncio.to_thread(_save_sync, key, processed, content_type)
     return key
