@@ -1,7 +1,7 @@
 import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Form
+from fastapi import APIRouter, Depends, Form, UploadFile
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -182,10 +182,29 @@ async def update_user_business_profile(
 
     update_data = payload.model_dump(exclude_unset=True)
 
+    new_key: str | None = None
+
+    if "logo" in update_data:
+        logo = update_data.pop("logo")
+
+        if logo is None or isinstance(logo, str):
+            user_business_profile.logo = None
+        else:
+            new_key = await save_image(
+                upload=logo, folder="logos", fmt="png", field="logo"
+            )
+            user_business_profile.logo = new_key
+
     for field, value in update_data.items():
         setattr(user_business_profile, field, value)
 
-    await db.commit()
+    try:
+        await db.commit()
+    except Exception:
+        if new_key:
+            await delete_image(new_key)
+        raise
+
     await db.refresh(user_business_profile)
 
     return build_business_profile_out(user_business_profile)
