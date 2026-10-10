@@ -27,7 +27,7 @@ class UserProfileOut(BaseModel):
 
 class UserProfileUpdate(BaseModel):
     full_name: str | None = Field(default=None, min_length=3)
-    profile_picture: str | None = None
+    profile_picture: UploadFile | str | None = None
     phone_number: str | None = None
     job_title: str | None = None
 
