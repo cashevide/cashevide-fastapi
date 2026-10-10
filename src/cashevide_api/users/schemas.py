@@ -1,4 +1,6 @@
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from fastapi import UploadFile
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic_core import PydanticCustomError
 from typing import Literal
 
 
@@ -25,9 +27,20 @@ class UserProfileOut(BaseModel):
 
 class UserProfileUpdate(BaseModel):
     full_name: str | None = Field(default=None, min_length=3)
-    # profile_picture: str | None = None
+    profile_picture: str | None = None
     phone_number: str | None = None
     job_title: str | None = None
+
+    @field_validator("profile_picture")
+    @classmethod
+    def only_file_or_empty(cls, value: UploadFile | str | None):
+        if isinstance(value, str) and value != "":
+            raise PydanticCustomError(
+                "not_a_file",
+                "The submitted data was not a file. "
+                "Check the encoding type on the form.",
+            )
+        return value
 
 
 class UserBusinessProfileOut(BaseModel):
