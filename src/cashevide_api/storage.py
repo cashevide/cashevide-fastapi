@@ -16,7 +16,7 @@ from cashevide_api.config import settings
 class ImageError(Exception):
     status_code: int = 422
 
-    def __init__(self, message: str, field: str | None = None):
+    def __init__(self, message: str, field: str | None = None) -> None:
         super().__init__(message)
         self.field = field
 
