@@ -23,6 +23,8 @@ RUN chmod +x /entrypoint.sh
 COPY --chown=cashevide:cashevide . .
 RUN uv sync --frozen --no-dev
 
+RUN mkdir -p /app/media && chown cashevide:cashevide /app/media
+
 USER cashevide
 
 ENTRYPOINT ["/entrypoint.sh"]

@@ -3,6 +3,7 @@ services:
     command: uvicorn cashevide_api.main:app --host 0.0.0.0 --port 8000 --reload
     volumes:
       - .:/app
+      - media_data:/app/media
     ports:
       - "8001:8000"
     networks:
@@ -14,9 +15,14 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
+volumes:
+  media_data:
+
 networks:
   proxy-network:
     external: false
   cashevide_default:
     external: false
   default:
+
+
