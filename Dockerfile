@@ -3,6 +3,7 @@ FROM python:3.14-slim
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV UV_PROJECT_ENVIRONMENT=/usr/local
+ENV MEDIA_ROOT=/tmp/media
 
 RUN apt-get update && apt-get install -y \
   netcat-openbsd \
@@ -22,8 +23,6 @@ RUN chmod +x /entrypoint.sh
 
 COPY --chown=cashevide:cashevide . .
 RUN uv sync --frozen --no-dev
-
-RUN mkdir -p /app/media && chown cashevide:cashevide /app/media
 
 USER cashevide
 
