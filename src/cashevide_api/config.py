@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     db_port: int = 5432
     db_echo: bool = False
 
+    redis_url: str = "redis://localhost:6379/0"
+
     jwt_secret_key: str
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 5

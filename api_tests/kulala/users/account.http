@@ -2,3 +2,9 @@
 
 GET {{base_url}}/users/check-user?field=username&value=test2
 Content-Type: application/json
+
+
+### Check referral code exist
+
+GET {{base_url}}/users/check-referral-code?code=0WOH24
+Content-Type: application/json

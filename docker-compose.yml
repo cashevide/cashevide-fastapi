@@ -9,6 +9,14 @@ services:
       - cashevide_default
     restart: unless-stopped
 
+  fastapi-redis:
+    image: redis:alpine
+    container_name: cashevide-fastapi-redis
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+    command: sh -c 'exec redis-server --requirepass "$$REDIS_PASSWORD"'
+    restart: unless-stopped
+
 networks:
   proxy-network:
     external: true

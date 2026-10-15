@@ -1,3 +1,5 @@
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import APIRouter, FastAPI, Request
@@ -9,12 +11,21 @@ from sqladmin import Admin
 from starlette.middleware.sessions import SessionMiddleware
 
 from cashevide_api.admin import AdminAuth, register_admin_views
+from cashevide_api.cache import redis_client
 from cashevide_api.config import settings
 from cashevide_api.database import engine
+from cashevide_api.health import router as health_router
 from cashevide_api.storage import ImageError
 from cashevide_api.users.routers import router as users_router
 
-app = FastAPI(title="Cashevide API", debug=settings.debug)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
+    yield
+    await redis_client.aclose()
+
+
+app = FastAPI(title="Cashevide API", debug=settings.debug, lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -31,6 +42,7 @@ api_router = APIRouter(prefix="/api")
 api_router.include_router(users_router)
 
 app.include_router(api_router)
+app.include_router(health_router)
 
 if not settings.use_s3_storage:
     media_dir = Path(settings.media_root)
@@ -70,8 +82,3 @@ def root() -> dict[str, str]:
         "docs": "/docs",
         "health": "/health",
     }
-
-
-@app.get("/health")
-def health_check() -> dict[str, str]:
-    return {"status": "ok"}
