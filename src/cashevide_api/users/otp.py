@@ -16,7 +16,7 @@ class OTPError(Exception):
         self.content = content
 
 
-def generate_top(length: int = 6) -> str:
+def generate_otp(length: int = 6) -> str:
     return f"{secrets.randbelow(10**length):0{length}d}"
 
 
@@ -34,7 +34,7 @@ async def request_otp(redis: Redis, email: str, purpose: str) -> None:
             {"error": "Please wait 60 seconds before requesting another OTP."}
         )
 
-    otp = generate_top()
+    otp = generate_otp()
     await redis.set(otp_key, otp, ex=OTP_TTL)
     await redis.delete(attempts_key)
 
@@ -62,8 +62,7 @@ async def verify_otp(redis: Redis, email: str, otp: str, purpose: str) -> None:
             }
         )
 
-    stored_str = str(stored)
-    if not secrets.compare_digest(stored_str.encode(), otp.encode()):
+    if not secrets.compare_digest(stored.encode(), otp.encode()):  # type:ignore
         attempts = await redis.incr(attempts_key)
         await redis.expire(attempts_key, OTP_TTL)
 
