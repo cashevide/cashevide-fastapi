@@ -25,6 +25,15 @@ class UserProfileOut(BaseModel):
     credit_points: int
 
 
+class OTPRequest(BaseModel):
+    email: EmailStr
+
+
+class OTPVerify(BaseModel):
+    email: EmailStr
+    otp: str
+
+
 class UserProfileUpdate(BaseModel):
     full_name: str | None = Field(default=None, min_length=3)
     profile_picture: UploadFile | str | None = None
