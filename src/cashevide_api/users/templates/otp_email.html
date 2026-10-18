@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cashevide Verification Code</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      background-color: #f4f5f7;
+      font-family:
+        -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto,
+        Helvetica, Arial, sans-serif;
+    "
+  >
+    <table
+      role="presentation"
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+      style="background-color: #f4f5f7; padding: 32px 16px"
+    >
+      <tr>
+        <td align="center">
+          <table
+            role="presentation"
+            width="100%"
+            cellpadding="0"
+            cellspacing="0"
+            style="
+              max-width: 480px;
+              background-color: #ffffff;
+              border-radius: 12px;
+              overflow: hidden;
+              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            "
+          >
+            <!-- Header -->
+            <tr>
+              <td
+                align="center"
+                style="background-color: #000000; padding: 28px 32px"
+              >
+                <img
+                  src="https://cashevide.com/assets/images/logo.png"
+                  alt="Cashevide"
+                  width="120"
+                  style="
+                    display: block;
+                    width: 120px;
+                    max-width: 120px;
+                    height: auto;
+                  "
+                />
+              </td>
+            </tr>
+
+            <!-- Body -->
+            <tr>
+              <td style="padding: 32px">
+                {% if purpose == "password_reset" %}
+                <h1 style="margin: 0 0 8px; font-size: 20px; color: #0f172a">
+                  Reset your password
+                </h1>
+                <p
+                  style="
+                    margin: 0 0 24px;
+                    font-size: 15px;
+                    line-height: 1.6;
+                    color: #475569;
+                  "
+                >
+                  Use the verification code below to reset your Cashevide
+                  password.
+                </p>
+                {% else %}
+                <h1 style="margin: 0 0 8px; font-size: 20px; color: #0f172a">
+                  Welcome to Cashevide!
+                </h1>
+                <p
+                  style="
+                    margin: 0 0 24px;
+                    font-size: 15px;
+                    line-height: 1.6;
+                    color: #475569;
+                  "
+                >
+                  Use the verification code below to complete your signup.
+                </p>
+                {% endif %}
+
+                <!-- OTP box -->
+                <table
+                  role="presentation"
+                  width="100%"
+                  cellpadding="0"
+                  cellspacing="0"
+                >
+                  <tr>
+                    <td
+                      align="center"
+                      style="
+                        background-color: #f1f5f9;
+                        border-radius: 8px;
+                        padding: 20px;
+                      "
+                    >
+                      <span
+                        style="
+                          font-size: 32px;
+                          font-weight: 700;
+                          letter-spacing: 8px;
+                          color: #0f172a;
+                          font-family: &quot;Courier New&quot;, monospace;
+                        "
+                      >
+                        {{ otp }}
+                      </span>
+                    </td>
+                  </tr>
+                </table>
+
+                <p style="margin: 24px 0 0; font-size: 14px; color: #64748b">
+                  This code will expire in <strong>5 minutes</strong>. If you
+                  didn't request this, you can safely ignore this email.
+                </p>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td
+                style="
+                  padding: 20px 32px;
+                  background-color: #f8fafc;
+                  border-top: 1px solid #e2e8f0;
+                "
+              >
+                <p style="margin: 0; font-size: 12px; color: #94a3b8">
+                  &copy; Cashevide. This is an automated message, please do not
+                  reply.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

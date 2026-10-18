@@ -37,6 +37,12 @@ class Settings(BaseSettings):
     media_base_url: str = "http://localhost:8001/media/"
     max_image_upload_mb: int = 10
 
+    email_host: str = "email-smtp.ap-south-1.amazonaws.com"
+    email_port: int = 587
+    smtp_username: str | None = None
+    smtp_password: str | None = None
+    default_from_email: str = "noufalkakdlr@gmail.com"
+
     admin_email: str | None = None
     admin_username: str = "admin"
     admin_password: str | None = None
