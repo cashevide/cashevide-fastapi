@@ -19,7 +19,7 @@ templates = Environment(
 
 
 def _build_message(email: str, otp: str, purpose: str) -> EmailMessage:
-    if purpose == "otp_request":
+    if purpose == "password_reset":
         subject = "Your Cashevide Password Reset Code"
         text = (
             "Hello,"

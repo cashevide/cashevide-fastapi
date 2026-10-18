@@ -5,6 +5,7 @@ services:
     env_file:
       - .env
     networks:
+      - default
       - proxy-network
       - cashevide_default
     restart: unless-stopped
