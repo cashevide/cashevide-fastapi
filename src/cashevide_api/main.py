@@ -1,3 +1,4 @@
+import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -7,6 +8,9 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+
+from redis.exceptions import RedisError
+
 from sqladmin import Admin
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -17,6 +21,8 @@ from cashevide_api.database import engine
 from cashevide_api.health import router as health_router
 from cashevide_api.storage import ImageError
 from cashevide_api.users.routers import router as users_router
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -73,6 +79,15 @@ async def validation_exception_handler(
 async def image_error_handler(request: Request, exc: ImageError) -> JSONResponse:
     content = {exc.field: [str(exc)]} if exc.field else {"detail": str(exc)}
     return JSONResponse(status_code=exc.status_code, content=content)
+
+
+@app.exception_handler(RedisError)
+async def redis_error_handler(request: Request, exc: RedisError) -> JSONResponse:
+    logger.error("Redis error on %s %s: %s", request.method, request.url.path, exc)
+    return JSONResponse(
+        status_code=503,
+        content={"error": "Service temporarily unavailable. Please try again later."},
+    )
 
 
 @app.get("/")
