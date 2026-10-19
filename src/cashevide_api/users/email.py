@@ -7,8 +7,11 @@ from email.message import EmailMessage
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+from sqlalchemy import select
 
 from cashevide_api.config import settings
+from cashevide_api.database import AsyncSessionLocal
+from cashevide_api.webhooks.models import SuppressedEmail
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +64,15 @@ async def send_otp_email(email: str, otp: str, purpose: str) -> None:
     if settings.debug:
         logger.warning("DEV ONLY - %s OTP for %s: %s", purpose, email, otp)
         return
+
+    async with AsyncSessionLocal() as db:
+        suppressed = await db.scalar(
+            select(SuppressedEmail.id).where(SuppressedEmail.email == email).limit(1)
+        )
+
+        if suppressed is not None:
+            logger.warning("Skipped sending OTP to suppressed email: %s", email)
+            raise ValueError("This email address cannot receive emails at this time.")
 
     msg = _build_message(email, otp, purpose)
     await asyncio.to_thread(_send_sync, msg)
