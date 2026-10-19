@@ -1,5 +1,14 @@
+import re
+from difflib import SequenceMatcher
 from fastapi import UploadFile
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    EmailStr,
+    Field,
+    field_validator,
+    ValidationInfo,
+)
 from pydantic_core import PydanticCustomError
 from typing import Literal
 
@@ -92,8 +101,45 @@ class UserBusinessProfileUpdate(BaseModel):
 
 class UserCreate(BaseModel):
     email: EmailStr
-    username: str
+    username: str = Field(min_length=1, max_length=150)
     password: str
+    full_name: str = Field(min_length=1, max_length=200)
+    referral_code_input: str = Field(min_length=1)
+    platform: Literal["web", "mobile"] = "mobile"
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, value: str, info: ValidationInfo) -> str:
+        if len(value) < 8:
+            raise PydanticCustomError(
+                "password_too_short",
+                "This password is too short. It must contain at least 8 characters.",
+            )
+
+        if value.isdigit():
+            raise PydanticCustomError(
+                "password_entirely_numeric", "This password is entirely numeric."
+            )
+
+        for field, label in (("username", "username"), ("email", "email address")):
+            attribute = info.data.get(field)
+
+            if not attribute:
+                continue
+
+            attribute = str(attribute).lower()
+
+            for part in [*re.split(r"\W+", attribute), attribute]:
+                if (
+                    part
+                    and SequenceMatcher(a=value.lower(), b=part).quick_ratio() >= 0.7
+                ):
+                    raise PydanticCustomError(
+                        "password_too_similar",
+                        "The password is too similar to the {label}.",
+                        {"label": label},
+                    )
+        return value
 
 
 class UserLogin(BaseModel):
