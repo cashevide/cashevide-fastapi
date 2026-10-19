@@ -71,3 +71,14 @@ class BlacklistedToken(Base):
     blacklisted_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
+
+
+class UserSubscription(Base):
+    __tablename__ = "users_usersubscription"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("users_user.id", ondelete="CASCADE"), unique=True
+    )
+    tier: Mapped[str] = mapped_column(String(20), default="COMMUNITY")
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
