@@ -1,8 +1,11 @@
+import logging
 import secrets
 
 from redis.asyncio import Redis
 
 from cashevide_api.users.email import send_otp_email
+
+logger = logging.getLogger(__name__)
 
 OTP_TTL = 300
 COOLDOWN_TTL = 60
@@ -41,6 +44,7 @@ async def request_otp(redis: Redis, email: str, purpose: str) -> None:
     try:
         await send_otp_email(email, otp, purpose)
     except Exception as exc:
+        logger.exception("Failed to send %s OTP to %s", purpose, email)
         await redis.delete(cooldown_key, otp_key)
         raise OTPError(
             {"error": "Failed to send the OTP. Please try again later."}
