@@ -19,6 +19,7 @@ from cashevide_api.security import (
     create_access_token,
     create_refresh_token,
 )
+from cashevide_api.users.utils import set_auth_cookies
 
 router = APIRouter(tags=["auth"])
 
@@ -72,35 +73,16 @@ async def login(
     refresh_token = create_refresh_token(user.id)
 
     if payload.platform == "web":
-        response.set_cookie(
-            key="access_token",
-            value=access_token,
-            max_age=settings.jwt_access_token_expire_minutes * 60,
-            httponly=True,
-            secure=not settings.debug,
-            samesite="lax",
-            domain=settings.cookie_domain,
-        )
-
-        response.set_cookie(
-            key="refresh_token",
-            value=refresh_token,
-            max_age=settings.jwt_refresh_token_expire_days * 24 * 60 * 60,
-            httponly=True,
-            secure=not settings.debug,
-            samesite="lax",
-            domain=settings.cookie_domain,
-        )
+        set_auth_cookies(response, access_token, refresh_token)
 
         return LoginResponse(
             message="login successful",
             user=UserOut.model_validate(user),
         )
 
-    else:
-        return LoginResponse(
-            message="login successful",
-            user=UserOut.model_validate(user),
-            access=access_token,
-            refresh=refresh_token,
-        )
+    return LoginResponse(
+        message="login successful",
+        user=UserOut.model_validate(user),
+        access=access_token,
+        refresh=refresh_token,
+    )
