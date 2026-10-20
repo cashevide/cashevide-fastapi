@@ -11,6 +11,8 @@ from pydantic import (
 from pydantic_core import PydanticCustomError
 from typing import Literal
 
+from cashevide_api.users.schemas.password import validate_password_rules
+
 
 class UserOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -42,16 +44,8 @@ class UserCreate(BaseModel):
     @field_validator("password")
     @classmethod
     def validate_password(cls, value: str, info: ValidationInfo) -> str:
-        if len(value) < 8:
-            raise PydanticCustomError(
-                "password_too_short",
-                "This password is too short. It must contain at least 8 characters.",
-            )
 
-        if value.isdigit():
-            raise PydanticCustomError(
-                "password_entirely_numeric", "This password is entirely numeric."
-            )
+        value = validate_password_rules(value)
 
         for field, label in (("username", "username"), ("email", "email address")):
             attribute = info.data.get(field)
