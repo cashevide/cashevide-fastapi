@@ -55,9 +55,11 @@ async def password_reset_request_otp(
 ):
     message = {"message": "If an account exists, an OTP has been sent."}
 
-    exist = await db.scalar(select(User.id).where(User.email == payload.email).limit(1))
+    exists = await db.scalar(
+        select(User.id).where(User.email == payload.email).limit(1)
+    )
 
-    if exist is None:
+    if exists is None:
         return message
 
     try:
