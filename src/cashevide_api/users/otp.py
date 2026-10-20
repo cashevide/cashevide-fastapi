@@ -85,3 +85,11 @@ async def verify_otp(redis: Redis, email: str, otp: str, purpose: str) -> None:
 
     await redis.set(_key(purpose, "verified", email), "1", ex=VERIFIED_TTL)
     await redis.delete(otp_key, attempts_key)
+
+
+async def is_otp_verified(redis: Redis, email: str, purpose: str) -> bool:
+    return bool(await redis.exists(_key(purpose, "verified", email)))
+
+
+async def clear_otp_verified(redis: Redis, email: str, purpose: str) -> None:
+    await redis.delete(_key(purpose, "verified", email))

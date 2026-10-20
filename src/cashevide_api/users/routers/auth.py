@@ -4,7 +4,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from sqlalchemy import select
 
-from cashevide_api.config import settings
 from cashevide_api.database import get_db
 from cashevide_api.users.models import User
 from cashevide_api.users.schemas import (
