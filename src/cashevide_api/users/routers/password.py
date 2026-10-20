@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Response
 from fastapi.responses import JSONResponse
 from redis.asyncio import Redis
-from sqlalchemy import alias, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from cashevide_api.cache import get_redis
