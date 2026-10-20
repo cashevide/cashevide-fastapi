@@ -45,3 +45,38 @@ async def signup_verify_otp(payload: OTPVerify, redis: Redis = Depends(get_redis
         return JSONResponse(status_code=400, content=exc.content)
 
     return {"message": "Email verification successful."}
+
+
+@router.post("/password-reset-request-otp")
+async def password_reset_request_otp(
+    payload: OTPRequest,
+    db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
+):
+    message = {"message": "If an account exists, an OTP has been sent."}
+
+    exist = await db.scalar(select(User.id).where(User.email == payload.email).limit(1))
+
+    if exist is None:
+        return message
+
+    try:
+        await request_otp(redis, payload.email, "password_reset")
+
+    except OTPError as exc:
+        return JSONResponse(status_code=400, content=exc.content)
+
+    return message
+
+
+@router.post("/password-reset-verify-otp")
+async def password_reset_verify_otp(
+    payload: OTPVerify, redis: Redis = Depends(get_redis)
+):
+    try:
+        await verify_otp(redis, payload.email, payload.otp, "password_reset")
+
+    except OTPError as exc:
+        return JSONResponse(status_code=400, content=exc.content)
+
+    return {"message": "Email verification successful."}
