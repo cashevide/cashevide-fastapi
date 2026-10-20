@@ -30,6 +30,10 @@ async def verify_password_async(plain_password: str, hash_password: str) -> bool
     return await asyncio.to_thread(verify_password, plain_password, hash_password)
 
 
+def has_usable_password(hashed_password: str) -> bool:
+    return not hashed_password.startswith("!")
+
+
 def create_access_token(user_id: int) -> str:
     expire = datetime.now(timezone.utc) + timedelta(
         minutes=settings.jwt_access_token_expire_minutes
