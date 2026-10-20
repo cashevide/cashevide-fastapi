@@ -53,15 +53,15 @@ def clear_auth_cookies(response: Response) -> None:
     response.delete_cookie("refresh_token", domain=settings.cookie_domain)
 
 
-async def blacklist_refresh_token(db: AsyncSession, refresh_token: str | None) -> None:
+async def blacklist_refresh_token(db: AsyncSession, refresh_token: str | None) -> bool:
     if not refresh_token:
-        return
+        return False
 
     try:
         _, jti = decode_refresh_token(refresh_token)
     except Exception as exc:
         logger.warning("Could not blacklist refresh token: %s", exc)
-        return
+        return False
 
     already = await db.scalar(
         select(BlacklistedToken.id).where(BlacklistedToken.jti == jti).limit(1)
@@ -69,3 +69,5 @@ async def blacklist_refresh_token(db: AsyncSession, refresh_token: str | None) -
 
     if already is None:
         db.add(BlacklistedToken(jti=jti))
+
+    return True

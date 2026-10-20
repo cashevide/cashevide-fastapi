@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, Response
+from fastapi import APIRouter, Cookie, HTTPException, Depends, Response
 
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,13 +18,18 @@ from cashevide_api.users.schemas import (
     LoginResponse,
 )
 from cashevide_api.users.otp import is_otp_verified, clear_otp_verified
+from cashevide_api.users.schemas.token import TokenRefresh
 from cashevide_api.users.services import create_user_account
 from cashevide_api.security import (
     verify_password_async,
     create_access_token,
     create_refresh_token,
 )
-from cashevide_api.users.utils import set_auth_cookies
+from cashevide_api.users.utils import (
+    blacklist_refresh_token,
+    clear_auth_cookies,
+    set_auth_cookies,
+)
 
 router = APIRouter(tags=["auth"])
 
@@ -144,3 +149,29 @@ async def login(
         access=access_token,
         refresh=refresh_token,
     )
+
+
+@router.post("/logout")
+async def logout(
+    response: Response,
+    payload: TokenRefresh,
+    db: AsyncSession = Depends(get_db),
+    refresh_token_cookie: str | None = Cookie(default=None, alias="refresh_token"),
+):
+    refresh_token = (payload.refresh if payload else None) or refresh_token_cookie
+
+    if not refresh_token:
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Refresh token is required to logout"},
+        )
+
+    if not await blacklist_refresh_token(db, refresh_token):
+        return JSONResponse(
+            status_code=400, content={"error": "Invalid or expired token"}
+        )
+
+    await db.commit()
+    clear_auth_cookies(response)
+
+    return {"message": "Successfully logged out"}
