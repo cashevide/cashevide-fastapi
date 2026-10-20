@@ -21,7 +21,7 @@ async def reset_password(
     db: AsyncSession = Depends(get_db),
     redis: Redis = Depends(get_redis),
 ):
-    if not is_otp_verified(redis, payload.email, "password_reset"):
+    if not await is_otp_verified(redis, payload.email, "password_reset"):
         return JSONResponse(
             status_code=400,
             content={
@@ -32,7 +32,7 @@ async def reset_password(
             },
         )
 
-    user = await db.scalar(select(User).where(User.email == payload.email).limit(1))
+    user = await db.scalar(select(User).where(User.email == payload.email))
 
     if user is None:
         raise HTTPException(status_code=404, detail="No User matches the given query.")
