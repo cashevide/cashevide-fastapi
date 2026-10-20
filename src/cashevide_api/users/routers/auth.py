@@ -154,7 +154,7 @@ async def login(
 @router.post("/logout")
 async def logout(
     response: Response,
-    payload: TokenRefresh,
+    payload: TokenRefresh | None = None,
     db: AsyncSession = Depends(get_db),
     refresh_token_cookie: str | None = Cookie(default=None, alias="refresh_token"),
 ):
