@@ -6,6 +6,7 @@ from cashevide_api.users.schemas.auth import (
 )
 
 from cashevide_api.users.schemas.otp import OTPVerify, OTPRequest
+from cashevide_api.users.schemas.password import PasswordResetConfirm
 
 from cashevide_api.users.schemas.profile import (
     UserBusinessProfileOut,
@@ -30,4 +31,5 @@ __all__ = [
     "UserOut",
     "UserProfileOut",
     "UserProfileUpdate",
+    "PasswordResetConfirm",
 ]

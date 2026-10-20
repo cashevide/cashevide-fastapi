@@ -1,3 +1,5 @@
+from pydantic import BaseModel, EmailStr, field_validator
+
 from pydantic_core import PydanticCustomError
 
 
@@ -14,3 +16,13 @@ def validate_password_rules(value: str) -> str:
         )
 
     return value
+
+
+class PasswordResetConfirm(BaseModel):
+    email: EmailStr
+    new_password: str
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_new_password(cls, value) -> str:
+        return validate_password_rules(value)
