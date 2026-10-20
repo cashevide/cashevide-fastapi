@@ -28,6 +28,17 @@ class UserCreate(BaseModel):
     referral_code_input: str = Field(min_length=1)
     platform: Literal["web", "mobile"] = "mobile"
 
+    @field_validator("username")
+    @classmethod
+    def validate_username(cls, value: str) -> str:
+        if not re.fullmatch(r"[\w.@+-]+", value):
+            raise PydanticCustomError(
+                "invalid_username",
+                "Enter a valid username. This value may contain only letters, "
+                "numbers, and @/./+/-/_ characters.",
+            )
+        return value
+
     @field_validator("password")
     @classmethod
     def validate_password(cls, value: str, info: ValidationInfo) -> str:
