@@ -17,3 +17,25 @@ Content-Type: application/json
   "email": "test100@email.com",
   "otp": "566405"
 }
+
+
+
+### Password Reset Request OTP
+
+POST {{base_url}}/users/password-reset-request-otp HTTP/1.1
+Content-Type: application/json
+
+{
+  "email": "noufal@email.com"
+}
+
+
+### Password Reset Verify OTP
+
+POST {{base_url}}/users/password-reset-verify-otp HTTP/1.1
+Content-Type: application/json
+
+{
+  "email": "noufal@email.com",
+  "otp": "654921"
+}

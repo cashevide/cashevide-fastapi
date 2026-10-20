@@ -8,3 +8,14 @@ Content-Type: application/json
 
 GET {{base_url}}/users/check-referral-code?code=0WOH24
 Content-Type: application/json
+
+
+### Reset Password
+
+POST {{base_url}}/users/reset-password HTTP/1.1
+Content-Type: application/json
+
+{
+  "email": "noufal@email.com",
+  "new_password": "noufal123"
+}
