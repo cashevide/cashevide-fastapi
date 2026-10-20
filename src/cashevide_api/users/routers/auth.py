@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends, Response
 
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
 
 from sqlalchemy import select
 
@@ -28,7 +29,7 @@ from cashevide_api.users.utils import set_auth_cookies
 router = APIRouter(tags=["auth"])
 
 
-@router.post("/signup", response_model=UserOut, status_code=201)
+@router.post("/signup", response_model=LoginResponse, status_code=201)
 async def signup(
     payload: UserCreate,
     response: Response,
