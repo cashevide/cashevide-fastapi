@@ -1,19 +1,24 @@
 from fastapi import APIRouter, HTTPException, Depends, Response
 
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from sqlalchemy import select
 
+from redis.asyncio import Redis
+
 from cashevide_api.database import get_db
-from cashevide_api.users.models import User
+from cashevide_api.cache import get_redis
+from cashevide_api.users.models import User, UserProfile
 from cashevide_api.users.schemas import (
     UserOut,
     UserCreate,
     UserLogin,
     LoginResponse,
 )
+from cashevide_api.users.otp import is_otp_verified, clear_otp_verified
+from cashevide_api.users.services import create_user_account
 from cashevide_api.security import (
-    hash_password,
     verify_password,
     create_access_token,
     create_refresh_token,
@@ -24,30 +29,78 @@ router = APIRouter(tags=["auth"])
 
 
 @router.post("/signup", response_model=UserOut, status_code=201)
-async def signup(payload: UserCreate, db: AsyncSession = Depends(get_db)) -> User:
+async def signup(
+    payload: UserCreate,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
+) -> LoginResponse | JSONResponse:
+
+    errors: dict[str, list[str]] = {}
+
     existing_email = await db.scalar(select(User).where(User.email == payload.email))
 
     if existing_email is not None:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        errors["email"] = ["user with this email already exists."]
 
     existing_username = await db.scalar(
         select(User).where(User.username == payload.username)
     )
 
     if existing_username is not None:
-        raise HTTPException(status_code=400, detail="Username already registered")
+        errors["username"] = ["A user with that username already exists."]
 
-    user = User(
-        email=payload.email,
-        username=payload.username,
-        password=hash_password(payload.password),
+    referrer = await db.scalar(
+        select(UserProfile).where(
+            UserProfile.referral_code == payload.referral_code_input
+        )
     )
 
-    db.add(user)
-    await db.commit()
-    await db.refresh(user)
+    if referrer is None:
+        errors["referral_code_input"] = [
+            "The referral code provided is incorrect. Please check it."
+        ]
 
-    return user
+    if errors:
+        return JSONResponse(status_code=400, content=errors)
+
+    if not await is_otp_verified(redis, payload.email, "signup"):
+        return JSONResponse(
+            status_code=400,
+            content={
+                "email": [
+                    "This email address has not been verified. "
+                    "Please verify it using an OTP first."
+                ]
+            },
+        )
+
+    try:
+        user = await create_user_account(db, payload, referrer)
+
+    except IntegrityError:
+        await db.rollback()
+        return JSONResponse(
+            status_code=400,
+            content={"error": "An account with these details already exists."},
+        )
+
+    await clear_otp_verified(redis, payload.email, "signup")
+
+    access_token = create_access_token(user.id)
+    refresh_token = create_refresh_token(user.id)
+    user_out = UserOut.model_validate(user)
+
+    if payload.platform == "web":
+        set_auth_cookies(response, access_token, refresh_token)
+        return LoginResponse(message="Signup successful", user=user_out)
+
+    return LoginResponse(
+        message="Signup successful",
+        user=UserOut.model_validate(user),
+        access=access_token,
+        refresh=refresh_token,
+    )
 
 
 @router.post(
