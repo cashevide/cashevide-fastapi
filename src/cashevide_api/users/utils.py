@@ -1,3 +1,4 @@
+import logging
 import random
 import string
 
@@ -7,7 +8,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from cashevide_api.config import settings
-from cashevide_api.users.models import UserProfile
+from cashevide_api.users.models import BlacklistedToken, UserProfile
+from cashevide_api.security import decode_refresh_token
+
+logger = logging.getLogger(__name__)
 
 
 async def generate_unique_referral_code(db: AsyncSession) -> str:
@@ -42,3 +46,26 @@ def set_auth_cookies(response: Response, access_token: str, refresh_token: str) 
         samesite="lax",
         domain=settings.cookie_domain,
     )
+
+
+def clear_auth_cookies(response: Response) -> None:
+    response.delete_cookie("access_token", domain=settings.cookie_domain)
+    response.delete_cookie("refresh_token", domain=settings.cookie_domain)
+
+
+async def blacklist_refresh_token(db: AsyncSession, refresh_token: str | None):
+    if not refresh_token:
+        return
+
+    try:
+        _, jti = decode_refresh_token(refresh_token)
+    except Exception as exc:
+        logger.warning("Could not blacklist refresh token: %s", exc)
+        return
+
+    already = await db.scalar(
+        select(BlacklistedToken.id).where(BlacklistedToken.jti == jti).limit(1)
+    )
+
+    if already is None:
+        db.add(BlacklistedToken(jti=jti))
