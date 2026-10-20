@@ -1,4 +1,5 @@
 import uuid
+import asyncio
 from datetime import datetime, timedelta, timezone
 
 import jwt
@@ -19,6 +20,14 @@ def hash_password(plain_password: str) -> str:
 
 def verify_password(plain_password: str, hash_password: str) -> bool:
     return pwd_context.verify(plain_password, hash_password)
+
+
+async def hash_password_async(plain_password: str) -> str:
+    return await asyncio.to_thread(hash_password, plain_password)
+
+
+async def verify_password_async(plain_password: str, hash_password: str) -> bool:
+    return await asyncio.to_thread(verify_password, plain_password, hash_password)
 
 
 def create_access_token(user_id: int) -> str:

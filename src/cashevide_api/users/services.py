@@ -8,7 +8,7 @@ from cashevide_api.users.models import (
     UserBusinessProfile,
     UserSubscription,
 )
-from cashevide_api.security import hash_password
+from cashevide_api.security import hash_password_async
 from cashevide_api.legal.models import LegalDocument, UserLegalDocumentAcceptance
 from cashevide_api.users.utils import generate_unique_referral_code
 
@@ -25,7 +25,7 @@ async def create_user_account(
     user = User(
         email=payload.email,
         username=payload.username,
-        password=hash_password(payload.password),
+        password=await hash_password_async(payload.password),
     )
 
     db.add(user)

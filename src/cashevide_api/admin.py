@@ -4,7 +4,7 @@ from sqladmin.authentication import AuthenticationBackend
 from sqlalchemy import select
 
 from cashevide_api.database import AsyncSessionLocal
-from cashevide_api.security import verify_password
+from cashevide_api.security import verify_password_async
 from cashevide_api.users.admin import (
     BlacklistedTokenAdmin,
     UserAdmin,
@@ -23,7 +23,9 @@ class AdminAuth(AuthenticationBackend):
         async with AsyncSessionLocal() as db:
             user = await db.scalar(select(User).where(User.email == email))
 
-            if user is None or not verify_password(str(password), user.password):
+            if user is None or not await verify_password_async(
+                str(password), user.password
+            ):
                 return False
 
             if not user.is_superuser:

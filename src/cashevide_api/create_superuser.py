@@ -4,7 +4,7 @@ from sqlalchemy import select
 
 from cashevide_api.config import settings
 from cashevide_api.database import AsyncSessionLocal
-from cashevide_api.security import hash_password
+from cashevide_api.security import hash_password_async
 from cashevide_api.users.models import User
 
 
@@ -25,7 +25,7 @@ async def create_superuser() -> None:
         superuser = User(
             email=settings.admin_email,
             username=settings.admin_username,
-            password=hash_password(settings.admin_password),
+            password=await hash_password_async(settings.admin_password),
             is_superuser=True,
             is_staff=True,
         )

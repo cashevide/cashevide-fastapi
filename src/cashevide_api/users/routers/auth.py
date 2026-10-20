@@ -20,7 +20,7 @@ from cashevide_api.users.schemas import (
 from cashevide_api.users.otp import is_otp_verified, clear_otp_verified
 from cashevide_api.users.services import create_user_account
 from cashevide_api.security import (
-    verify_password,
+    verify_password_async,
     create_access_token,
     create_refresh_token,
 )
@@ -124,7 +124,7 @@ async def login(
         )
     )
 
-    if user is None or not verify_password(payload.password, user.password):
+    if user is None or not await verify_password_async(payload.password, user.password):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
     access_token = create_access_token(user.id)
