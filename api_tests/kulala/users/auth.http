@@ -1,15 +1,31 @@
 ### Signup
 
-POST {{base_url}}/users/signup
+POST {{base_url}}/users/signup/ HTTP/1.1
 Content-Type: application/json
 
 {
-  "email": "test15@email.com",
-  "full_name": "Test14",
+  "email": "test100@email.com",
+  "full_name": "Test",
   "password": "noufal123",
   "platform": "mobile",
-  "username": "test15"
+  "referral_code_input": "NOUFAL",
+  "username": "test100"
 }
+
+> {%
+  var cookieHeader = response.headers.valueOf("Set-Cookie");
+
+  if (cookieHeader) {
+      var match = cookieHeader.match(/access_token=([^;]+)/);
+
+      if (match) {
+          client.global.set("token", match[1]);
+      }
+  }
+  else{
+      client.global.set("token", response.body.access)
+    }
+%}
 
 
 

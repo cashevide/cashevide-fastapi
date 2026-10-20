@@ -29,7 +29,12 @@ from cashevide_api.users.utils import set_auth_cookies
 router = APIRouter(tags=["auth"])
 
 
-@router.post("/signup", response_model=LoginResponse, status_code=201)
+@router.post(
+    "/signup",
+    response_model=LoginResponse,
+    response_model_exclude_none=True,
+    status_code=201,
+)
 async def signup(
     payload: UserCreate,
     response: Response,
