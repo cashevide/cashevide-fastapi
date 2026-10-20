@@ -53,7 +53,7 @@ def clear_auth_cookies(response: Response) -> None:
     response.delete_cookie("refresh_token", domain=settings.cookie_domain)
 
 
-async def blacklist_refresh_token(db: AsyncSession, refresh_token: str | None):
+async def blacklist_refresh_token(db: AsyncSession, refresh_token: str | None) -> None:
     if not refresh_token:
         return
 

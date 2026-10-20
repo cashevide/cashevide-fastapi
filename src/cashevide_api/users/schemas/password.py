@@ -1,4 +1,5 @@
-from pydantic import BaseModel, EmailStr, field_validator
+from typing import Annotated
+from pydantic import AfterValidator, BaseModel, EmailStr
 
 from pydantic_core import PydanticCustomError
 
@@ -18,11 +19,15 @@ def validate_password_rules(value: str) -> str:
     return value
 
 
+NewPassword = Annotated[str, AfterValidator(validate_password_rules)]
+
+
 class PasswordResetConfirm(BaseModel):
     email: EmailStr
-    new_password: str
+    new_password: NewPassword
 
-    @field_validator("new_password")
-    @classmethod
-    def validate_new_password(cls, value) -> str:
-        return validate_password_rules(value)
+
+class PasswordChange(BaseModel):
+    current_password: str | None = None
+    new_password: NewPassword
+    refresh: str | None = None
