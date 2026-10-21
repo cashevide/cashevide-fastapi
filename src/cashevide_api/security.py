@@ -1,4 +1,5 @@
 import uuid
+import secrets
 import asyncio
 from datetime import datetime, timedelta, timezone
 
@@ -19,7 +20,14 @@ def hash_password(plain_password: str) -> str:
 
 
 def verify_password(plain_password: str, hash_password: str) -> bool:
-    return pwd_context.verify(plain_password, hash_password)
+
+    if not has_usable_password(hash_password):
+        return False
+
+    try:
+        return pwd_context.verify(plain_password, hash_password)
+    except ValueError:
+        return False
 
 
 async def hash_password_async(plain_password: str) -> str:
@@ -28,6 +36,10 @@ async def hash_password_async(plain_password: str) -> str:
 
 async def verify_password_async(plain_password: str, hash_password: str) -> bool:
     return await asyncio.to_thread(verify_password, plain_password, hash_password)
+
+
+def make_unusable_password() -> str:
+    return "!" + secrets.token_urlsafe(32)
 
 
 def has_usable_password(hashed_password: str) -> bool:

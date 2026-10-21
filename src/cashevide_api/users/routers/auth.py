@@ -22,6 +22,7 @@ from cashevide_api.users.otp import is_otp_verified, clear_otp_verified
 from cashevide_api.users.schemas.token import TokenRefresh
 from cashevide_api.users.services import create_user_account
 from cashevide_api.security import (
+    hash_password_async,
     verify_password_async,
     create_access_token,
     create_refresh_token,
@@ -89,7 +90,14 @@ async def signup(
         )
 
     try:
-        user = await create_user_account(db, payload, referrer)
+        user = await create_user_account(
+            db,
+            email=payload.email,
+            username=payload.username,
+            full_name=payload.full_name,
+            password_hash=await hash_password_async(payload.password),
+            referrer=referrer,
+        )
 
     except IntegrityError:
         await db.rollback()

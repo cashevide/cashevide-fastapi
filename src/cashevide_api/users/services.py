@@ -1,14 +1,12 @@
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from cashevide_api.users.schemas.auth import UserCreate
 from cashevide_api.users.models import (
     UserProfile,
     User,
     UserBusinessProfile,
     UserSubscription,
 )
-from cashevide_api.security import hash_password_async
 from cashevide_api.legal.models import LegalDocument, UserLegalDocumentAcceptance
 from cashevide_api.users.utils import generate_unique_referral_code
 
@@ -19,13 +17,20 @@ REFERRER_BONUS_CREDITS = 25
 
 
 async def create_user_account(
-    db: AsyncSession, payload: UserCreate, referrer: UserProfile | None = None
+    db: AsyncSession,
+    *,
+    email: str,
+    username: str,
+    full_name: str,
+    password_hash: str,
+    referrer: UserProfile | None = None,
+    profile_picture: str | None = None,
 ) -> User:
 
     user = User(
-        email=payload.email,
-        username=payload.username,
-        password=await hash_password_async(payload.password),
+        email=email,
+        username=username,
+        password=password_hash,
     )
 
     db.add(user)
@@ -47,7 +52,8 @@ async def create_user_account(
     db.add(
         UserProfile(
             user_id=user.id,
-            full_name=payload.full_name,
+            full_name=full_name,
+            profile_picture=profile_picture,
             referral_code=await generate_unique_referral_code(db),
             referred_by_id=referred_by_id,
             credit_points=credits,
