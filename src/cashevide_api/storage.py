@@ -89,6 +89,21 @@ def _delete_sync(key: str) -> None:
         (Path(settings.media_root) / key).unlink(missing_ok=True)
 
 
+async def save_image_bytes(
+    data: bytes,
+    folder: str,
+    fmt: Literal["jpg", "png"],
+    max_size: int = 512,
+) -> str:
+    processed, content_type = await asyncio.to_thread(
+        process_image, data, fmt, max_size
+    )
+
+    key = f"{folder}/{uuid.uuid4().hex}.{fmt}"
+    await asyncio.to_thread(_save_sync, key, processed, content_type)
+    return key
+
+
 async def save_image(
     upload: UploadFile,
     folder: str,
@@ -103,16 +118,12 @@ async def save_image(
             raise ImageTooLargeError(
                 f"Image is too large. Maximum size is {settings.max_image_upload_mb} MB."
             )
-        processed, content_type = await asyncio.to_thread(
-            process_image, data, fmt, max_size
-        )
+
+        return await save_image_bytes(data, folder, fmt, max_size)
+
     except ImageError as exc:
         exc.field = field
         raise
-
-    key = f"{folder}/{uuid.uuid4().hex}.{fmt}"
-    await asyncio.to_thread(_save_sync, key, processed, content_type)
-    return key
 
 
 async def delete_image(key: str | None) -> None:
