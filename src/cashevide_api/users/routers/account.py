@@ -5,12 +5,13 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from cashevide_api.database import get_db
+from cashevide_api.ratelimit import RateLimit
 from cashevide_api.users.models import User, UserProfile
 
 router = APIRouter(tags=["account"])
 
 
-@router.get("/check-user")
+@router.get("/check-user", dependencies=[Depends(RateLimit("check_user", 20))])
 async def check_user(
     field: Literal["username", "email"],
     value: Annotated[str, Query(min_length=1)],
@@ -22,7 +23,9 @@ async def check_user(
     return {"is_available": taken is None}
 
 
-@router.get("/check-referral-code")
+@router.get(
+    "/check-referral-code", dependencies=[Depends(RateLimit("check_referral_code", 20))]
+)
 async def check_referral_code(
     response: Response, code: str = "", db: AsyncSession = Depends(get_db)
 ):

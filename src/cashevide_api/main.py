@@ -3,7 +3,7 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import APIRouter, FastAPI, Request
+from fastapi import APIRouter, Depends, FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -19,6 +19,7 @@ from cashevide_api.cache import redis_client
 from cashevide_api.config import settings
 from cashevide_api.database import engine
 from cashevide_api.health import router as health_router
+from cashevide_api.ratelimit import RateLimit
 from cashevide_api.storage import ImageError
 from cashevide_api.users.routers import router as users_router
 
@@ -43,7 +44,7 @@ app.add_middleware(
 
 app.add_middleware(SessionMiddleware, secret_key=settings.jwt_secret_key)
 
-api_router = APIRouter(prefix="/api")
+api_router = APIRouter(prefix="/api", dependencies=[Depends(RateLimit("global", 120))])
 
 api_router.include_router(users_router)
 
