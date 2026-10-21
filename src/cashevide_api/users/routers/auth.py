@@ -121,7 +121,7 @@ async def signup(
     response_model=LoginResponse,
     response_model_exclude_none=True,
     status_code=200,
-    dependencies=[Depends(RateLimit("signup", 10))],
+    dependencies=[Depends(RateLimit("login", 10))],
 )
 async def login(
     payload: UserLogin, response: Response, db: AsyncSession = Depends(get_db)
