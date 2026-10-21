@@ -1,7 +1,23 @@
+import ipaddress
+
 from fastapi import Depends, HTTPException, Request
 from redis.asyncio import Redis
 
 from cashevide_api.cache import get_redis
+
+
+def normalize_ip(ip: str) -> str:
+    """Collapse IPv6 addresses to their /64 so one visitor cannot dodge
+    the limit by rotating addresses inside their own block."""
+    try:
+        addr = ipaddress.ip_address(ip)
+    except ValueError:
+        return ip
+    if isinstance(addr, ipaddress.IPv6Address):
+        if addr.ipv4_mapped:
+            return str(addr.ipv4_mapped)
+        return str(ipaddress.IPv6Network((addr, 64), strict=False))
+    return str(addr)
 
 
 def get_client_ip(request: Request) -> str:
@@ -32,7 +48,7 @@ class RateLimit:
     async def __call__(
         self, request: Request, redis: Redis = Depends(get_redis)
     ) -> None:
-        key = f"ratelimit:{self.name}:{get_client_ip(request)}"
+        key = f"ratelimit:{self.name}:{normalize_ip(get_client_ip(request))}"
 
         # One atomic transaction: count the request, set the expiry only if
         # the key has none yet (NX), and read the remaining time.
