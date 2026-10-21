@@ -8,6 +8,7 @@ from sqlalchemy import select
 
 from redis.asyncio import Redis
 
+from cashevide_api.ratelimit import RateLimit
 from cashevide_api.database import get_db
 from cashevide_api.cache import get_redis
 from cashevide_api.users.models import User, UserProfile
@@ -39,6 +40,7 @@ router = APIRouter(tags=["auth"])
     response_model=LoginResponse,
     response_model_exclude_none=True,
     status_code=201,
+    dependencies=[Depends(RateLimit("signup", 10))],
 )
 async def signup(
     payload: UserCreate,
@@ -119,6 +121,7 @@ async def signup(
     response_model=LoginResponse,
     response_model_exclude_none=True,
     status_code=200,
+    dependencies=[Depends(RateLimit("signup", 10))],
 )
 async def login(
     payload: UserLogin, response: Response, db: AsyncSession = Depends(get_db)
