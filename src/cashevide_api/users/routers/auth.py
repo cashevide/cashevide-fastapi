@@ -154,7 +154,7 @@ async def login(
     )
 
 
-@router.post("/logout")
+@router.post("/logout", dependencies=[Depends(RateLimit("logout", 10))])
 async def logout(
     response: Response,
     payload: TokenRefresh | None = None,

@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from cashevide_api.cache import get_redis
 from cashevide_api.database import get_db
+from cashevide_api.ratelimit import RateLimit
 from cashevide_api.security import (
     has_usable_password,
     hash_password_async,
@@ -22,7 +23,7 @@ from cashevide_api.users.utils import blacklist_refresh_token, clear_auth_cookie
 router = APIRouter(tags=["password"])
 
 
-@router.post("/reset-password")
+@router.post("/reset-password", dependencies=[Depends(RateLimit("reset_password", 10))])
 async def reset_password(
     payload: PasswordResetConfirm,
     db: AsyncSession = Depends(get_db),
@@ -52,7 +53,9 @@ async def reset_password(
     return {"detail": "Password has been updated successfully."}
 
 
-@router.post("/change-password")
+@router.post(
+    "/change-password", dependencies=[Depends(RateLimit("change_password", 10))]
+)
 async def change_password(
     payload: PasswordChange,
     response: Response,

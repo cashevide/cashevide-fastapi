@@ -6,6 +6,7 @@ from sqlalchemy import select
 
 from cashevide_api.config import settings
 from cashevide_api.database import get_db
+from cashevide_api.ratelimit import RateLimit
 from cashevide_api.users.models import BlacklistedToken
 from cashevide_api.users.schemas import (
     TokenRefreshResponse,
@@ -24,6 +25,7 @@ router = APIRouter(prefix="/token", tags=["token"])
     "/refresh",
     response_model=TokenRefreshResponse,
     response_model_exclude_none=True,
+    dependencies=[Depends(RateLimit("token_refresh", 30))],
 )
 async def refresh_access_token(
     payload: TokenRefresh,
