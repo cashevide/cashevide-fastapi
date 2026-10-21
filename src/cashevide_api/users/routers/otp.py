@@ -10,11 +10,14 @@ from cashevide_api.database import get_db
 from cashevide_api.users.models import User
 from cashevide_api.users.otp import OTPError, request_otp, verify_otp
 from cashevide_api.users.schemas import OTPRequest, OTPVerify
+from cashevide_api.ratelimit import RateLimit
 
 router = APIRouter(tags=["otp"])
 
 
-@router.post("/signup-request-otp")
+@router.post(
+    "/signup-request-otp", dependencies=[Depends(RateLimit("signup_request_otp", 5))]
+)
 async def signup_request_otp(
     payload: OTPRequest,
     db: AsyncSession = Depends(get_db),
@@ -36,7 +39,9 @@ async def signup_request_otp(
     return {"message": "An OTP has been successfully sent to your email address."}
 
 
-@router.post("/signup-verify-otp")
+@router.post(
+    "/signup-verify-otp", dependencies=[Depends(RateLimit("signup_verify_otp", 10))]
+)
 async def signup_verify_otp(payload: OTPVerify, redis: Redis = Depends(get_redis)):
     try:
         await verify_otp(redis, payload.email, payload.otp, "signup")
@@ -47,7 +52,10 @@ async def signup_verify_otp(payload: OTPVerify, redis: Redis = Depends(get_redis
     return {"message": "Email verification successful."}
 
 
-@router.post("/password-reset-request-otp")
+@router.post(
+    "/password-reset-request-otp",
+    dependencies=[Depends(RateLimit("password_reset_request_otp", 5))],
+)
 async def password_reset_request_otp(
     payload: OTPRequest,
     db: AsyncSession = Depends(get_db),
@@ -71,7 +79,10 @@ async def password_reset_request_otp(
     return message
 
 
-@router.post("/password-reset-verify-otp")
+@router.post(
+    "/password-reset-verify-otp",
+    dependencies=[Depends(RateLimit("password_reset_verify_otp", 10))],
+)
 async def password_reset_verify_otp(
     payload: OTPVerify, redis: Redis = Depends(get_redis)
 ):
