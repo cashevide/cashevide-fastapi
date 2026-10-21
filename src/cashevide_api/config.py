@@ -25,6 +25,8 @@ class Settings(BaseSettings):
 
     cookie_domain: str | None = None
 
+    google_client_id: str | None = None
+
     cors_allowed_origins: str = ""
 
     use_s3_storage: bool = False
