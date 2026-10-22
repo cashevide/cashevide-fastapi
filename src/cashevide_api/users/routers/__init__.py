@@ -6,6 +6,7 @@ from cashevide_api.users.routers.profile import router as profile_router
 from cashevide_api.users.routers.token import router as token_router
 from cashevide_api.users.routers.otp import router as otp_router
 from cashevide_api.users.routers.password import router as password_router
+from cashevide_api.users.routers.google import router as google_router
 
 router = APIRouter(prefix="/users")
 
@@ -15,3 +16,4 @@ router.include_router(token_router)
 router.include_router(account_router)
 router.include_router(otp_router)
 router.include_router(password_router)
+router.include_router(google_router)
