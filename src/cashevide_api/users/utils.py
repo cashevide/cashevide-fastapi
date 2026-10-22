@@ -1,17 +1,30 @@
 import logging
 import random
 import string
+import re
 
 from fastapi import Response
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from pydantic_core import PydanticCustomError
+
 from cashevide_api.config import settings
 from cashevide_api.users.models import BlacklistedToken, UserProfile
 from cashevide_api.security import decode_refresh_token
 
 logger = logging.getLogger(__name__)
+
+
+def check_username_characters(value: str) -> str:
+    if not re.fullmatch(r"[\w.@+-]+", value):
+        raise PydanticCustomError(
+            "invalid_username",
+            "Enter a valid username. This value may contain only letters, "
+            "numbers, and @/./+/-/_ characters.",
+        )
+    return value
 
 
 async def generate_unique_referral_code(db: AsyncSession) -> str:

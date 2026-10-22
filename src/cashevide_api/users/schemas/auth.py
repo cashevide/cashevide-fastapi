@@ -12,6 +12,7 @@ from pydantic_core import PydanticCustomError
 from typing import Literal
 
 from cashevide_api.users.schemas.password import validate_password_rules
+from cashevide_api.users.utils import check_username_characters
 
 
 class UserOut(BaseModel):
@@ -32,14 +33,10 @@ class UserCreate(BaseModel):
 
     @field_validator("username")
     @classmethod
-    def validate_username(cls, value: str) -> str:
-        if not re.fullmatch(r"[\w.@+-]+", value):
-            raise PydanticCustomError(
-                "invalid_username",
-                "Enter a valid username. This value may contain only letters, "
-                "numbers, and @/./+/-/_ characters.",
-            )
-        return value
+    def validate_username(cls, value: str | None) -> str | None:
+        if value is None:
+            return value
+        return check_username_characters(value)
 
     @field_validator("password")
     @classmethod

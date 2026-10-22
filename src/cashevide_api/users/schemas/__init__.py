@@ -16,6 +16,7 @@ from cashevide_api.users.schemas.profile import (
 )
 
 from cashevide_api.users.schemas.token import TokenRefresh, TokenRefreshResponse
+from cashevide_api.users.schemas.google import GoogleAuthRequest
 
 
 __all__ = [
@@ -33,4 +34,5 @@ __all__ = [
     "UserProfileUpdate",
     "PasswordResetConfirm",
     "PasswordChange",
+    "GoogleAuthRequest",
 ]
