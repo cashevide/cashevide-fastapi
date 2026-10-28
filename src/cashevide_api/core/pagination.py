@@ -1,9 +1,9 @@
 from typing import Generic, TypeVar
 
-from fastapi import HTTPException, Request
-from pydantic import BaseModel
-from sqlalchemy import Select, func, select
+from fastapi import Request
+from sqlalchemy import Select
 from sqlalchemy.ext.asyncio import AsyncSession
+from pydantic import BaseModel
 
 PAGE_SIZE = 10
 
@@ -14,15 +14,15 @@ class Page(BaseModel, Generic[T]):
     count: int
     next: str | None
     previous: str | None
-    results: list[T]
+    result: list[T]
 
 
 def _page_url(request: Request, page: int | None) -> str:
-    """Absolute URL of this request with ?page= set (or removed for page 1)."""
+
     url = request.url
 
-    # Behind nginx the app sees plain http; the browser used the forwarded scheme.
     scheme = request.headers.get("x-forwarded-proto")
+
     if scheme in ("http", "https"):
         url = url.replace(scheme=scheme)
 
@@ -33,28 +33,6 @@ def _page_url(request: Request, page: int | None) -> str:
 
 
 async def paginate(
-    db: AsyncSession,
-    query: Select,
-    request: Request,
-    schema: type[T],
-    page: int = 1,
-    page_size: int = PAGE_SIZE,
-) -> Page[T]:
-    """Run `query` one page at a time in the DRF PageNumberPagination shape."""
-    count = await db.scalar(
-        select(func.count()).select_from(query.order_by(None).subquery())
-    )
-    count = count or 0
-    last_page = max(1, -(-count // page_size))
-
-    if page < 1 or page > last_page:
-        raise HTTPException(status_code=404, detail="Invalid page.")
-
-    rows = await db.scalars(query.limit(page_size).offset((page - 1) * page_size))
-
-    return Page[schema](  # type: ignore[valid-type]
-        count=count,
-        next=_page_url(request, page + 1) if page < last_page else None,
-        previous=_page_url(request, page - 1) if page > 1 else None,
-        results=[schema.model_validate(row) for row in rows],
-    )
+    db: AsyncSession, query: Select, request: Request, schema: type[T], page: int = 1
+):
+    pass
