@@ -1,9 +1,9 @@
 from typing import Generic, TypeVar
 
-from fastapi import Request
-from sqlalchemy import Select
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import HTTPException, Request
 from pydantic import BaseModel
+from sqlalchemy import Select, func, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 PAGE_SIZE = 10
 
@@ -33,6 +33,28 @@ def _page_url(request: Request, page: int | None) -> str:
 
 
 async def paginate(
-    db: AsyncSession, query: Select, request: Request, schema: type[T], page: int = 1
+    db: AsyncSession,
+    query: Select,
+    request: Request,
+    schema: type[T],
+    page: int = 1,
+    page_size=PAGE_SIZE,
 ):
-    pass
+    count = await db.scalar(
+        select(func.count()).select_from(query.order_by(None).subquery())
+    )
+
+    count = count or 0
+    last_page = max(1, -(-count // page_size))
+
+    if page < 1 or page > last_page:
+        raise HTTPException(status_code=404, detail="invalid page")
+
+    rows = await db.scalar(query.limit(page_size).offset((page - 1) * page_size))
+
+    return Page[schema](  # type: ignore[valid-type]
+        count=count,
+        next=_page_url(request, page + 1) if page < last_page else None,
+        previous=_page_url(request, page - 1) if page > 1 else None,
+        result=[schema.model_validate(row) for row in rows],
+    )
