@@ -48,7 +48,7 @@ async def paginate(
     last_page = max(1, -(-count // page_size))
 
     if page < 1 or page > last_page:
-        raise HTTPException(status_code=404, detail="invalid page")
+        raise HTTPException(status_code=404, detail="Invalid page.")
 
     rows = await db.scalars(query.limit(page_size).offset((page - 1) * page_size))
 

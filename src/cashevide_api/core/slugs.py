@@ -10,7 +10,7 @@ SLUG_MAX_LENGTH = 50
 def slugify(value: str) -> str:
     value = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode()
     value = re.sub(r"[^\w\s-]", "", value.lower())
-    return re.sub(r"[-\s]+", "-", value.strip("-_"))
+    return re.sub(r"[-\s]+", "-", value).strip("-_")
 
 
 async def generate_unique_slug(
