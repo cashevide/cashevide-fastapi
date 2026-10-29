@@ -4,13 +4,13 @@ import unicodedata
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-SLUG_MAX_LENGHT = 50
+SLUG_MAX_LENGTH = 50
 
 
 def slugify(value: str) -> str:
     value = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode()
     value = re.sub(r"[^\w\s-]", "", value.lower())
-    return re.sub(r"[-\s]+", "-", value.strip("_-"))
+    return re.sub(r"[-\s]+", "-", value.strip("-_"))
 
 
 async def generate_unique_slug(
@@ -22,11 +22,11 @@ async def generate_unique_slug(
 
     while True:
         suffix = f"-{number}" if number else ""
-        candinate = base[: SLUG_MAX_LENGHT - len(suffix)].rstrip("_-") + suffix
+        candidate = base[: SLUG_MAX_LENGTH - len(suffix)].rstrip("_-") + suffix
 
-        taken = db.scalar(select(model.id).where(model.slug == candinate))
+        taken = await db.scalar(select(model.id).where(model.slug == candidate))
 
         if taken is None:
-            return candinate
+            return candidate
 
         number += 1

@@ -14,7 +14,7 @@ class Page(BaseModel, Generic[T]):
     count: int
     next: str | None
     previous: str | None
-    result: list[T]
+    results: list[T]
 
 
 def _page_url(request: Request, page: int | None) -> str:
@@ -50,11 +50,11 @@ async def paginate(
     if page < 1 or page > last_page:
         raise HTTPException(status_code=404, detail="invalid page")
 
-    rows = await db.scalar(query.limit(page_size).offset((page - 1) * page_size))
+    rows = await db.scalars(query.limit(page_size).offset((page - 1) * page_size))
 
     return Page[schema](  # type: ignore[valid-type]
         count=count,
         next=_page_url(request, page + 1) if page < last_page else None,
         previous=_page_url(request, page - 1) if page > 1 else None,
-        result=[schema.model_validate(row) for row in rows],
+        results=[schema.model_validate(row) for row in rows],
     )
